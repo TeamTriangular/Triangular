@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/**
+ * Script for moving the cannon. Will be able to click within the vicinity of the cannon and have it move to that location 
+ * based on the offset.
+ */
 public class CannonPlacement : MonoBehaviour {
 	
 	public float sizeOffset = 2;
