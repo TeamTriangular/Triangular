@@ -10,7 +10,14 @@ public class attraction : MonoBehaviour {
 	System.Collections.Generic.List<Connection> joints;
 	public TriangleGrid gridScript;
 	bool currentlyColliding = false; //true if the triangle is making contact with another triangle
-	
+
+	/**
+	 * Represents a PullForce will all variables needed for one. 
+	 * @param Vector3 applyPos is the original point of the triangle this script is on
+	 * @param Vector3 dstPos is the point that is closest to the original point, this is a corner or middle point
+	 * depending on what the original point is. 
+	 * @param Vector3 force is the closest point - the original point
+	 */
 	public struct PullForce
 	{
 		public Vector3 applyPos;
@@ -26,7 +33,12 @@ public class attraction : MonoBehaviour {
 			dist = Vector3.Distance(applyPos_, dstPos_);
 		}
 	};
-	
+
+	/**
+	 * Adds a connection between this triangle and the colliding triangle. 
+	 * @param Transform ctrlPoint1 is the point which the original triangle is joining the colliding one on.
+	 * @param Transform ctrlPoint2 is the point which the colliding triangle is joining on
+	 */
 	public struct Connection
 	{
 		public Transform ctrlPoint1;
@@ -126,7 +138,11 @@ public class attraction : MonoBehaviour {
 		}
     }
 
-	
+	/**
+	 * @param Transform t1 the point of the original triangle that a connection will tried to be made on
+	 * @param Transform t2 point of colliding triangle
+	 * @param Transform CollisionObj is the colliding triangle
+	 */
 	void attemptFormConnection(Transform t1, Transform t2, Transform collisionObj)
 	{
 		for(int i=0; i< joints.Count; i++)
@@ -271,7 +287,13 @@ public class attraction : MonoBehaviour {
 	{
 		return (Vector3.Distance(c1, c2) < 0.06f);
 	}
-	
+
+	/**
+	 * Used to determine the force for a given point. It will find the closest corner/middle point
+	 * in all of the triangles in the scene and return a pullforce struct
+	 * @param Transform is the transform point that we want to determine the pull force it has
+	 * @param bool is to say it it's a corner point or not. 
+	 */
 	PullForce getForceForPoint(Transform o, bool cornerPoint)
 	{
 		GameObject[] points;
@@ -309,7 +331,11 @@ public class attraction : MonoBehaviour {
 		// return max force so it is never chosen as the lowest force. this is the equivlant to null
 		return new PullForce(Vector3.zero, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue ), new Vector3(float.MaxValue, float.MaxValue, float.MaxValue )); 
 	}
-	
+
+	/**
+	 * Used to determine if this point is a child of the triangle we're currently in
+	 * @param Gameobject the point which we compare. 
+	 */
 	bool shouldIgnore(GameObject o)
 	{
 		if(o.transform.IsChildOf(transform))

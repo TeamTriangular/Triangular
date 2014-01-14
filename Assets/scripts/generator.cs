@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/**
+ * For shooting the triangles. Sets a bool so that only one triangle can be fired at once,
+ * Applys the necessary forces of the triangle.
+ */
 public class generator : MonoBehaviour {
 
 	public GameObject prefab;
