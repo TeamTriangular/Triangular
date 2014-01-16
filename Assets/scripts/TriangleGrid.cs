@@ -5,10 +5,13 @@ public class TriangleGrid : MonoBehaviour {
 
 	public GameObject rootTriangle;
 	public GameObject trianglePrefab;
+	public GameObject triangleOutlinePrefab;
 
-	public int gridSize = 0;
+	int gridSize = 0;
 	// use getNode to access. uses euclidian coordinates. 0,0 is th center triangle
 	private triangleNode[,] grid;
+	private System.Collections.Generic.List<triangleNode> gridOutline;
+	
 
 	private class triangleNode
 	{
@@ -26,8 +29,9 @@ public class TriangleGrid : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		grid = new triangleNode[30,30];
+		grid = new triangleNode[20,20];
 		gridSize = (int)Mathf.Sqrt(grid.Length);
+		gridOutline = new System.Collections.Generic.List<triangleNode>();
 		
 		for(int i=0; i<gridSize; i++)
 		{
@@ -38,27 +42,81 @@ public class TriangleGrid : MonoBehaviour {
 		}
 
 		setNode(0, 0, rootTriangle);
-
-		//test grid
-//		for(int i =-2 ;i < 3; i++)
-//		{
-//			for(int j =-2 ;j < 3; j++)
-//			{
-//				GameObject temp = (GameObject)Instantiate(trianglePrefab);
-//				temp.GetComponent<attraction>().enabled = false;
-//				temp.rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-//
-//				setNode(i, j, temp);
-//
-//				setCorrectPosition(getNode(i, j));
-//			}
-//		}
+		
+		loadLevel(1);
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
 	
+	}
+	
+	public void showGrid()
+	{
+		for(int i = -gridSize/2 + 1;i < gridSize/2; i++)
+		{
+			for(int j = -gridSize/2 + 1;j < gridSize/2; j++)
+			{
+				GameObject tempObj = (GameObject)Instantiate(triangleOutlinePrefab);
+				//DestroyImmediate(temp.GetComponent<attraction>());
+				//temp.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+				
+				triangleNode tempNode = new triangleNode(tempObj, i, j);
+				gridOutline.Add(tempNode);
+
+				setCorrectPosition(tempNode);
+			}
+		}
+	}
+	
+	//loads level x where the name of the file is levelx
+	public void loadLevel(int index)
+	{
+		try 
+	    {
+			string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + index  + ".txt");
+			
+			for(int i=0; i< lines.Length; i++)
+			{
+				int commaIndex = lines[i].IndexOf(',');
+				int colonIndex = lines[i].IndexOf(':');
+				int x = int.Parse(lines[i].Substring(0, commaIndex));
+				int y = int.Parse(lines[i].Substring(commaIndex + 1, colonIndex - 1 - commaIndex));
+				
+				//color not being used yet
+				//createTriangleOnGrid needs a extra perameter and use color for deciding which color of triangle to instantiate
+				string color = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
+		
+				createTriangleOnGrid(x, y);
+			
+			}
+		}
+		catch
+		{
+			Debug.Log("error reading file level" + index + ".txt");
+		}
+	}
+	
+	public void hideGrid()
+	{
+		for(int i=0; i< gridOutline.Count; i++)
+		{
+			DestroyImmediate(gridOutline[i].triangleObject);
+		}
+		
+		gridOutline.Clear();
+	}
+	
+	//adds a triangle to the grid. used for the prexisting triangles of a level
+	private void createTriangleOnGrid(int x, int y)
+	{
+		GameObject tempObj = (GameObject)Instantiate(trianglePrefab);
+		tempObj.GetComponent<attraction>().enabled = false;
+		tempObj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+		
+		setNode(x, y, tempObj);
+		setCorrectPosition(getNode(x, y));
 	}
 
 	//attatches new triangle to old triangle
@@ -87,6 +145,7 @@ public class TriangleGrid : MonoBehaviour {
 
 		for(int i=0; i< possibleoffsets.Length; i++)
 		{
+			
 			if(getNode(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y) == null &&(
 			   minDist > Vector3.Distance(newTriangle.transform.position, getBasePosition(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y)) 
 				|| (x == int.MaxValue || y == int.MaxValue)))
@@ -161,28 +220,23 @@ public class TriangleGrid : MonoBehaviour {
 	{
 		Vector3 pos = getBasePosition(n.x, n.y);
 
-		if(!isPointingUp(n))
-		{
-			pos.y += 0.24f;	
-		}
-
-		//if it should be pointing up, rotate by 120, otherwise rotate by 60
+		//if it should be pointing down, rotate by 180
 		if(isPointingUp(n))
-		{
-			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 120));
+		{			
+			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
 		}
 		else
-		{
-			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 60));				
+		{	
+			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
 		}
-
+		
 		n.triangleObject.transform.position = pos;
 	}	
 
 	private Vector3 getBasePosition(int x, int y)
 	{
-		float xOffset = x * 0.415f;
-		float yOffset = y * 0.719f;
+		float xOffset = x * 0.5f ;
+		float yOffset = y * 0.866f;
 
 		return new Vector3(xOffset, yOffset, 0);
 	}

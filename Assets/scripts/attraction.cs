@@ -4,6 +4,8 @@ using System.Collections;
 public class attraction : MonoBehaviour {
 	public float rotationSpeed = 1.0f;
 
+	public float pullFactor = 1.0f;
+
 	Transform[] cornerPoints;
 	Transform[] centerPoints;
 	Vector3[] faceNormals = new Vector3[3];
@@ -79,7 +81,7 @@ public class attraction : MonoBehaviour {
 
 		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 
-		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 0  )) * transform.up;
+		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60  )) * transform.up;
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
@@ -103,18 +105,22 @@ public class attraction : MonoBehaviour {
 	
 	void OnCollisionStay(Collision collision) 
 	{
+
+		if(enabled == false)
+		{
+			return;
+		}
+
 		if(collision.gameObject.tag == "Triangle" && collision.gameObject.transform.childCount >0)
 		{
 			for(int i=0; i< cornerPoints.Length; i++)
 			{
 				for(int j=0; j< (cornerPoints.Length + centerPoints.Length); j++)
 				{
-					//Debug.Log(collision.gameObject.transform.childCount);
-					// temporarily use center points for hinge connection
 					if(collision.gameObject.transform.GetChild(j).tag == "MiddleControlPoint" &&
 						isCornerTouching(centerPoints[i].position, collision.gameObject.transform.GetChild(j).position))
 					{
-						//Debug.Log(cornerPoints[i].localPosition + "," + cornerPoints[i].position + " ||| " + collision.gameObject.transform.GetChild(j).localPosition + "," + collision.gameObject.transform.GetChild(j).position);
+						//lock triangles
 						attemptFormConnection(centerPoints[i].transform, collision.gameObject.transform.GetChild(j), collision.gameObject.transform);
 					}
 				}
@@ -161,29 +167,6 @@ public class attraction : MonoBehaviour {
 		Vector3 test = t2.position - t1.position;
 		transform.position =  transform.position + test;
 		
-		
-		//create hinge and remeber connection
-		ConfigurableJoint joint = gameObject.AddComponent<ConfigurableJoint>();
-		joint.connectedBody  = collisionObj.GetComponent<Rigidbody>();
-		//set up limits for rotation and movement
-		joint.xMotion = ConfigurableJointMotion.Limited;
-		joint.yMotion = ConfigurableJointMotion.Limited;
-		joint.zMotion = ConfigurableJointMotion.Limited;
-		joint.angularXMotion = ConfigurableJointMotion.Free;
-		joint.angularYMotion = ConfigurableJointMotion.Free;
-		joint.angularZMotion = ConfigurableJointMotion.Free;
-		
-		joint.anchor = t1.localPosition;
-		joint.connectedAnchor = t2.localPosition;
-//		
-//		HingeJoint joint = gameObject.AddComponent<HingeJoint>();
-//		joint.connectedBody  = collisionObj.GetComponent<Rigidbody>();
-//		joint.useLimits = true;
-//		JointLimits limits = new JointLimits();
-//		limits.min = -90;
-//		limits.max = 90;
-//		joint.limits = limits;
-		
 		joints.Add(new Connection(t1, t2, collisionObj));
 	}
 
@@ -222,7 +205,7 @@ public class attraction : MonoBehaviour {
 		
 		
 		for(int i=0; i< 1; i++)
-		{	;
+		{	
 			finalForce += lowestCenterForces[i].force;
 			//GetComponent<Rigidbody>().AddForce(lowestCenterForces[i].force * forcemult);	
 		}
@@ -230,6 +213,7 @@ public class attraction : MonoBehaviour {
 		if(lowestCenterForces[0].dist > 0)
 		{
 			forceMult = 1/(lowestCenterForces[0].dist);
+			forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
 		}
 		
 		GetComponent<Rigidbody>().AddForce(finalForce * forceMult);	
@@ -255,7 +239,6 @@ public class attraction : MonoBehaviour {
 					dotProduct = Vector3.Dot(cross, lowestCenterForces[0].dstPos - transform.position);
 					negative = dotProduct < 0;
 				}
-	
 			}
 	
 			if(negative)
@@ -285,7 +268,9 @@ public class attraction : MonoBehaviour {
 	
 	bool isCornerTouching(Vector3 c1, Vector3 c2)
 	{
-		return (Vector3.Distance(c1, c2) < 0.06f);
+		c1.z = 0;
+		c2.z = 0;
+		return (Vector3.Distance(c1, c2) < 0.1f);
 	}
 
 	/**
