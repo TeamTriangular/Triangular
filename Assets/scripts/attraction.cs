@@ -3,10 +3,8 @@ using System.Collections;
 
 public class attraction : MonoBehaviour {
 	public float rotationSpeed = 1.0f;
-<<<<<<< Updated upstream
-=======
+
 	public float pullFactor = 1.0f;
->>>>>>> Stashed changes
 
 	Transform[] cornerPoints;
 	Transform[] centerPoints;
@@ -83,11 +81,7 @@ public class attraction : MonoBehaviour {
 
 		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 
-<<<<<<< Updated upstream
 		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60  )) * transform.up;
-=======
-		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 0  )) * transform.up;
->>>>>>> Stashed changes
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
@@ -111,26 +105,22 @@ public class attraction : MonoBehaviour {
 	
 	void OnCollisionStay(Collision collision) 
 	{
-<<<<<<< Updated upstream
-=======
+
 		if(enabled == false)
 		{
 			return;
 		}
-		
->>>>>>> Stashed changes
+
 		if(collision.gameObject.tag == "Triangle" && collision.gameObject.transform.childCount >0)
 		{
 			for(int i=0; i< cornerPoints.Length; i++)
 			{
 				for(int j=0; j< (cornerPoints.Length + centerPoints.Length); j++)
 				{
-					//Debug.Log(collision.gameObject.transform.childCount);
-					// temporarily use center points for hinge connection
 					if(collision.gameObject.transform.GetChild(j).tag == "MiddleControlPoint" &&
 						isCornerTouching(centerPoints[i].position, collision.gameObject.transform.GetChild(j).position))
 					{
-						//Debug.Log(cornerPoints[i].localPosition + "," + cornerPoints[i].position + " ||| " + collision.gameObject.transform.GetChild(j).localPosition + "," + collision.gameObject.transform.GetChild(j).position);
+						//lock triangles
 						attemptFormConnection(centerPoints[i].transform, collision.gameObject.transform.GetChild(j), collision.gameObject.transform);
 					}
 				}
@@ -222,11 +212,8 @@ public class attraction : MonoBehaviour {
 		
 		if(lowestCenterForces[0].dist > 0)
 		{
-<<<<<<< Updated upstream
 			forceMult = 1/(lowestCenterForces[0].dist);
-=======
 			forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
->>>>>>> Stashed changes
 		}
 		
 		GetComponent<Rigidbody>().AddForce(finalForce * forceMult);	
@@ -252,10 +239,6 @@ public class attraction : MonoBehaviour {
 					dotProduct = Vector3.Dot(cross, lowestCenterForces[0].dstPos - transform.position);
 					negative = dotProduct < 0;
 				}
-<<<<<<< Updated upstream
-=======
-	
->>>>>>> Stashed changes
 			}
 	
 			if(negative)
@@ -285,7 +268,9 @@ public class attraction : MonoBehaviour {
 	
 	bool isCornerTouching(Vector3 c1, Vector3 c2)
 	{
-		return (Vector3.Distance(c1, c2) < 0.06f);
+		c1.z = 0;
+		c2.z = 0;
+		return (Vector3.Distance(c1, c2) < 0.1f);
 	}
 
 	/**

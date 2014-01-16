@@ -43,7 +43,6 @@ public class TriangleGrid : MonoBehaviour {
 
 		setNode(0, 0, rootTriangle);
 		
-		
 		loadLevel(1);
 	}
 	
@@ -88,8 +87,9 @@ public class TriangleGrid : MonoBehaviour {
 				//color not being used yet
 				//createTriangleOnGrid needs a extra perameter and use color for deciding which color of triangle to instantiate
 				string color = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
-	
+		
 				createTriangleOnGrid(x, y);
+			
 			}
 		}
 		catch
@@ -142,14 +142,9 @@ public class TriangleGrid : MonoBehaviour {
 		{
 			possibleoffsets[2] = new Vector2(0, -1);
 		}
-		
-		Debug.Log ("my pos : " + newTriangle.transform.position);
 
 		for(int i=0; i< possibleoffsets.Length; i++)
 		{
-			Debug.Log(getBasePosition(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y));
-			Debug.Log ((oldNode.x + (int)possibleoffsets[i].x) + "," + (oldNode.y + (int)possibleoffsets[i].y) + " min dist: " + 
-			Vector3.Distance(newTriangle.transform.position, getBasePosition(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y)));
 			
 			if(getNode(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y) == null &&(
 			   minDist > Vector3.Distance(newTriangle.transform.position, getBasePosition(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y)) 
@@ -228,15 +223,14 @@ public class TriangleGrid : MonoBehaviour {
 		//if it should be pointing down, rotate by 180
 		if(isPointingUp(n))
 		{			
-			n.triangleObject.transform.position = pos;
 			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
 		}
 		else
-		{
-			pos.y += 0.866f;			
-			n.triangleObject.transform.position = pos;
+		{	
 			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
-		}	
+		}
+		
+		n.triangleObject.transform.position = pos;
 	}	
 
 	private Vector3 getBasePosition(int x, int y)
