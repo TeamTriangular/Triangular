@@ -10,7 +10,10 @@ Library/expandedItems
 Library/metadata
 Library/previews
 Library/guidmapper
-Temp
+Library/
+Temp/
+Obj/
+UnityGenerated/
 *.csproj
 *.pidb
 *.sln
