@@ -79,7 +79,7 @@ public class attraction : MonoBehaviour {
 
 		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 
-		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 0  )) * transform.up;
+		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60  )) * transform.up;
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
@@ -161,29 +161,6 @@ public class attraction : MonoBehaviour {
 		Vector3 test = t2.position - t1.position;
 		transform.position =  transform.position + test;
 		
-		
-		//create hinge and remeber connection
-		ConfigurableJoint joint = gameObject.AddComponent<ConfigurableJoint>();
-		joint.connectedBody  = collisionObj.GetComponent<Rigidbody>();
-		//set up limits for rotation and movement
-		joint.xMotion = ConfigurableJointMotion.Limited;
-		joint.yMotion = ConfigurableJointMotion.Limited;
-		joint.zMotion = ConfigurableJointMotion.Limited;
-		joint.angularXMotion = ConfigurableJointMotion.Free;
-		joint.angularYMotion = ConfigurableJointMotion.Free;
-		joint.angularZMotion = ConfigurableJointMotion.Free;
-		
-		joint.anchor = t1.localPosition;
-		joint.connectedAnchor = t2.localPosition;
-//		
-//		HingeJoint joint = gameObject.AddComponent<HingeJoint>();
-//		joint.connectedBody  = collisionObj.GetComponent<Rigidbody>();
-//		joint.useLimits = true;
-//		JointLimits limits = new JointLimits();
-//		limits.min = -90;
-//		limits.max = 90;
-//		joint.limits = limits;
-		
 		joints.Add(new Connection(t1, t2, collisionObj));
 	}
 
@@ -222,7 +199,7 @@ public class attraction : MonoBehaviour {
 		
 		
 		for(int i=0; i< 1; i++)
-		{	;
+		{	
 			finalForce += lowestCenterForces[i].force;
 			//GetComponent<Rigidbody>().AddForce(lowestCenterForces[i].force * forcemult);	
 		}
@@ -255,7 +232,6 @@ public class attraction : MonoBehaviour {
 					dotProduct = Vector3.Dot(cross, lowestCenterForces[0].dstPos - transform.position);
 					negative = dotProduct < 0;
 				}
-	
 			}
 	
 			if(negative)
