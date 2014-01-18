@@ -81,7 +81,7 @@ public class attraction : MonoBehaviour {
 
 		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 
-		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60  )) * transform.up;
+		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60)) * transform.up;
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
@@ -240,7 +240,7 @@ public class attraction : MonoBehaviour {
 					negative = dotProduct < 0;
 				}
 			}
-	
+			
 			if(negative)
 			{
 				if(smallestRot < Time.deltaTime * rotationSpeed)

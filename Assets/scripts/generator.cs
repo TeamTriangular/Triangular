@@ -19,8 +19,12 @@ public class generator : MonoBehaviour {
 		if(Input.GetMouseButtonUp(0) && GlobalFlags.canFire)
 		{
 			GameObject instance = Instantiate(prefab, shooter.transform.position + 
-				((shooter.transform.rotation * Vector3.up) * 0.3f), shooter.transform.rotation) as GameObject;
+				((shooter.transform.rotation * Vector3.up) * 0.3f), Quaternion.identity) as GameObject;
 			instance.rigidbody.AddForce((shooter.transform.rotation * Vector3.up) * shootingForce);
+			
+			Vector3 rot = transform.rotation.eulerAngles;
+			rot.z -= 60;
+			instance.transform.rotation = Quaternion.Euler(rot);
 			
 			cannon.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
 			
