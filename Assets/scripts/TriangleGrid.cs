@@ -165,6 +165,180 @@ public class TriangleGrid : MonoBehaviour {
 		//attatch the new triangle to the side of the oldtriangle closest
 		setNode(x, y, newTriangle);
 		setCorrectPosition(getNode(x, y));
+		//checking for a Greater Triangle
+		CheckForGreaterTriangle(getNode(x, y));
+	}
+
+	/// <summary>
+	/// Checks for greater triangle.
+	/// </summary>
+	/// <param name="justAdded">Triangle that was just added</param>
+	private void CheckForGreaterTriangle(triangleNode justAdded)
+	{
+		triangleNode n;
+
+		if(isPointingUp(justAdded))
+		{
+			//check upper node
+			n = getNode(justAdded.x, justAdded.y - 1);
+			if(n !=null && CompareTriangleColours(n))
+			{
+				SetGreaterTriangleColours(n);
+				return;
+			}
+		}
+		else
+		{
+			//check lower node
+			n = getNode(justAdded.x, justAdded.y + 1);
+			if(n !=null && CompareTriangleColours(n))
+			{
+				SetGreaterTriangleColours(n);
+				return;
+			}
+		}
+		
+		//check left node
+		n = getNode(justAdded.x - 1, justAdded.y);
+		if(n !=null && CompareTriangleColours(n))
+		{
+			SetGreaterTriangleColours(n);
+			return;
+		}
+		
+		//check right node
+		n = getNode(justAdded.x + 1, justAdded.y);
+		if(n !=null && CompareTriangleColours(n))
+		{
+			SetGreaterTriangleColours(n);
+			return;
+		}
+	}
+
+	/// <summary>
+	/// looks at the 3 surrounding triangles and ensures they have the 
+	/// same colour
+	/// </summary>
+	/// <returns><c>true</c>, if triangle colours are the same
+	/// <c>false</c> otherwise.</returns>
+	/// <param name="center">The triangle in the center</param>
+	private bool CompareTriangleColours(triangleNode center)
+	{
+		Color c = new Color();
+		triangleNode n;
+
+		if(isPointingUp(center))
+		{
+			//check upper node
+			n = getNode(center.x, center.y - 1);
+			if(n == null)
+			{
+				return false;
+			}
+			c = (n.triangleObject.GetComponent<TriangleColour>().GetColour());
+		}
+		else
+		{
+			//check lower node
+			n = getNode(center.x, center.y + 1);
+			if(n == null)
+			{
+				return false;
+			}
+			c = (n.triangleObject.GetComponent<TriangleColour>().GetColour());
+		}
+
+
+		
+		//check left node
+		n = getNode(center.x - 1, center.y);
+		if(n != null)
+		{
+			if( c == Color.black)
+			{
+				c = (n.triangleObject.GetComponent<TriangleColour>().GetColour());
+			}
+			else
+			{
+				if(c != (n.triangleObject.GetComponent<TriangleColour>().GetColour())
+				   && (n.triangleObject.GetComponent<TriangleColour>().GetColour()) != Color.black)
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			return false;
+		}
+		
+		//check right node
+		n = getNode(center.x + 1, center.y);
+		if(n != null)
+		{
+			if(c != (n.triangleObject.GetComponent<TriangleColour>().GetColour())
+			   && (n.triangleObject.GetComponent<TriangleColour>().GetColour()) != Color.black)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/// <summary>
+	/// Sets the greater triangle colours to match the center colour
+	/// </summary>
+	/// <param name="center">The Center Triangle</param>
+	private void SetGreaterTriangleColours(triangleNode center)
+	{
+		Color c = center.triangleObject.GetComponent<TriangleColour>().GetColour();
+		triangleNode n;
+
+		if(isPointingUp(center))
+		{
+			//check upper node
+			n = getNode(center.x, center.y - 1);
+			if(n !=null && 
+			   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+			   != Color.black)
+			{
+				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+			}
+		}
+		else
+		{
+			//check lower node
+			n = getNode(center.x, center.y + 1);
+			if(n !=null && 
+			   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+			   != Color.black)
+			{
+				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+			}
+		}
+		
+		//check left node
+		n = getNode(center.x - 1, center.y);
+		if(n !=null && 
+		   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+		   != Color.black)
+		{
+			n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+		}
+		
+		//check right node
+		n = getNode(center.x + 1, center.y);
+		if(n !=null && 
+		   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+		   != Color.black)
+		{
+			n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+		}
 	}
 
 	private triangleNode getNode(int x, int y)
