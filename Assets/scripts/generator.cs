@@ -10,6 +10,14 @@ public class generator : MonoBehaviour {
 	public GameObject prefab;
 	public GameObject shooter;
 	public float shootingForce;
+
+	private GameObject queue;
+	private queue queueScript;
+
+	void Awake() {
+		queue = GameObject.Find ("Queue");
+		queueScript = queue.GetComponent<queue> ();
+	}
 	
 	// Update is called once per frame
 	void Update () 
@@ -18,17 +26,21 @@ public class generator : MonoBehaviour {
 		
 		if(Input.GetMouseButtonUp(0) && GlobalFlags.canFire)
 		{
-			GameObject instance = Instantiate(prefab, shooter.transform.position + 
-				((shooter.transform.rotation * Vector3.up) * 0.3f), Quaternion.identity) as GameObject;
-			instance.rigidbody.AddForce((shooter.transform.rotation * Vector3.up) * shootingForce);
+			GameObject triInstance = queueScript.fireShot();//getting the triangle from the queue, so the queue can update
+			if(triInstance != null) {
+				triInstance.transform.localPosition = shooter.transform.position + ((shooter.transform.rotation * Vector3.up) * 0.3f);
+				triInstance.transform.localRotation = Quaternion.identity;
+
+				triInstance.rigidbody.AddForce((shooter.transform.rotation * Vector3.up) * shootingForce);
 			
-			Vector3 rot = transform.rotation.eulerAngles;
-			rot.z -= 60;
-			instance.transform.rotation = Quaternion.Euler(rot);
+				Vector3 rot = transform.rotation.eulerAngles;
+				rot.z -= 60;
+				triInstance.transform.rotation = Quaternion.Euler(rot);
 			
-			cannon.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
+				cannon.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
 			
-			GlobalFlags.canFire = false;
+				GlobalFlags.canFire = false;
+			}
 		}
 	
 	}
