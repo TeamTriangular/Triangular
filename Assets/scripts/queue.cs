@@ -40,7 +40,7 @@ public class queue : MonoBehaviour {
 	public GameObject fireShot() {
 		if(currentTri < inQueue.Length) {
 			GameObject returnTri = (GameObject) Instantiate (trianglePrefab);
-			returnTri.renderer.material = inQueue[currentTri].renderer.material;
+			returnTri.GetComponent<TriangleColour>().SetColourFromMaterial(inQueue[currentTri].renderer.material);
 
 			//proceed to move the triangles in the queue as one has been fired.
 

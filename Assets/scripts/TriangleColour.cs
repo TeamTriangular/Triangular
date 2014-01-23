@@ -31,6 +31,54 @@ public class TriangleColour : MonoBehaviour {
 		SetMaterial();
 	}
 
+	/// <summary>
+	/// Sets the colour and material of the triangle based on
+    /// the color of the material given
+	/// 
+	/// Defaults to blue
+	/// </summary>
+	/// <param name="m">Material to base the color on</param>
+	public void SetColourFromMaterial (Material m)
+	{
+		Color c = m.color;
+
+		if(c == aqua.color)
+		{
+			colour = Color.cyan;
+		}
+		else if(c == black.color)
+		{
+			colour = Color.black;
+		}
+		else if(c == blue.color)
+		{
+			colour = Color.blue;
+		}
+		else if(c == green.color)
+		{
+			colour = Color.green;
+		}
+		else if(c == red.color)
+		{
+			colour = Color.red;
+		}
+		else if(c == yellow.color)
+		{
+			colour = Color.yellow;
+		}
+		else if(c == pink.color)
+		{
+			colour = Color.magenta;
+		}
+		else
+		{
+			Debug.Log("defaulting to blue");
+			colour = Color.blue;
+		}
+
+		SetMaterial();
+	}
+
 	private void SetMaterial()
 	{
 		if(colour == Color.cyan)
@@ -63,6 +111,7 @@ public class TriangleColour : MonoBehaviour {
 		}
 		else
 		{
+			Debug.Log("defaulting to blue");
 			renderer.material = blue;
 		}
 	}
