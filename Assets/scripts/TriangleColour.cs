@@ -13,12 +13,11 @@ public class TriangleColour : MonoBehaviour {
 	public Material yellow;
 
 	//This is for testing...allows the materials to be changed on the fly
-	/*
+
 	void Update()
 	{
 		SetMaterial();
 	}
-	*/
 
 	public Color GetColour ()
 	{

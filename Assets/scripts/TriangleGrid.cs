@@ -339,6 +339,67 @@ public class TriangleGrid : MonoBehaviour {
 		{
 			n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
 		}
+
+		CascadeAndClear(center);
+	}
+
+	private void CascadeAndClear(triangleNode center)
+	{
+		bool isUpwards = isPointingUp(center);
+		int x = center.x;
+		int y = center.y;
+
+		Destroy (center.triangleObject);
+		Vector2 realCords = getRealCoords(x , y);
+		grid[(int)realCords.x, (int)realCords.y] = null;
+		triangleNode n;
+
+		if(isUpwards)
+		{
+			n = getNode(x, y - 1);
+			if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+			   != Color.black)
+			{
+				CheckForGreaterTriangle(n);
+				Destroy (n.triangleObject);
+				realCords = getRealCoords(n.x , n.y);
+				grid[(int)realCords.x, (int)realCords.y] = null;
+			}
+		}
+		else
+		{
+			n = getNode(x, y + 1);
+			if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+			   != Color.black)
+			{
+				CheckForGreaterTriangle(n);
+				Destroy (n.triangleObject);
+				realCords = getRealCoords(n.x , n.y);
+				grid[(int)realCords.x, (int)realCords.y] = null;
+			}
+		}
+
+		// Left Node
+		n = getNode(x - 1, y);
+		if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+		   != Color.black)
+		{
+			CheckForGreaterTriangle(n);
+			Destroy (n.triangleObject);
+			realCords = getRealCoords(n.x , n.y);
+			grid[(int)realCords.x, (int)realCords.y] = null;
+		}
+
+		// Right Node
+		n = getNode(x + 1, y);
+		if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+		   != Color.black)
+		{
+			CheckForGreaterTriangle(n);
+			Destroy (n.triangleObject);
+			realCords = getRealCoords(n.x , n.y);
+			grid[(int)realCords.x, (int)realCords.y] = null;
+		}
 	}
 
 	private triangleNode getNode(int x, int y)
@@ -430,9 +491,9 @@ public class TriangleGrid : MonoBehaviour {
 	{
 		string s = "";
 
-		for(int i= gridSize/2; i >= -gridSize/2; i--)
+		for(int i= gridSize/2; i > -gridSize/2; i--)
 		{
-			for(int j= -gridSize/2; j <= gridSize/2; j++)
+			for(int j= -gridSize/2; j < gridSize/2; j++)
 			{
 				triangleNode n = getNode(j, i);
 				if(n != null)
