@@ -73,28 +73,14 @@ public class TriangleGrid : MonoBehaviour {
 	//loads level x where the name of the file is levelx
 	public void loadLevel(int index)
 	{
-		try 
-	    {
-			string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + index  + ".txt");
-			
-			for(int i=0; i< lines.Length; i++)
-			{
-				int commaIndex = lines[i].IndexOf(',');
-				int colonIndex = lines[i].IndexOf(':');
-				int x = int.Parse(lines[i].Substring(0, commaIndex));
-				int y = int.Parse(lines[i].Substring(commaIndex + 1, colonIndex - 1 - commaIndex));
-				
-				//color not being used yet
-				//createTriangleOnGrid needs a extra perameter and use color for deciding which color of triangle to instantiate
-				string color = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
-		
-				createTriangleOnGrid(x, y);
-			
-			}
-		}
-		catch
-		{
-			Debug.Log("error reading file level" + index + ".txt");
+		//color not being used yet
+		//TODO createTriangleOnGrid needs a extra perameter and use color for deciding which color of triangle to instantiate
+		LevelParser parser = GameObject.FindGameObjectWithTag ("GameManager").GetComponentInChildren<LevelParser>(); 
+		LevelParser.TriInfo [] triArray = parser.getTriArray ();
+
+		for (int i = 0; i < triArray.Length; i++) {
+			LevelParser.TriInfo temp = triArray[i];
+			createTriangleOnGrid(temp.getX(), temp.getY());
 		}
 	}
 	
