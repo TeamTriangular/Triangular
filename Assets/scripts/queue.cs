@@ -5,22 +5,32 @@ public class queue : MonoBehaviour {
 
 	GameObject [] inQueue;
 
-	public GameObject [] level1;
-
-	public GameObject [] level2;
-
-	public GameObject [] level3;
-
-	public GameObject [] level4;
-
-	public GameObject [] level5;
-
 	public GameObject trianglePrefab;
+
+	public GameObject blueQueueTriangle;
+
+	public GameObject aquaQueueTriangle;
+
+	public GameObject greenQueueTriangle;
+
+	public GameObject pinkQueueTriangle;
+
+	public GameObject redQueueTriangle;
+
+	public GameObject yellowQueueTriangle;
+
+	public static readonly string RED = "r";
+
+	public static readonly string GREEN = "g";
+
+	public static readonly string BLUE = "b";
+
+	public static readonly string AQUA = "a";
+
+	public static readonly string PINK = "p";
 
 	//distance between each triangle in the queue
 	private float distance = 1.5f;
-
-	private int currentLevel;
 
 	private int currentTri = 0;
 	
@@ -28,8 +38,7 @@ public class queue : MonoBehaviour {
 	 * Used to load level 1 into the queue. All further levels will be checked with the update script. 
 	 */
 	void Start () {
-		currentLevel = 1;
-		loadLevel (currentLevel);
+		loadLevel ();
 	}
 
 	/**
@@ -74,52 +83,42 @@ public class queue : MonoBehaviour {
 	 * Takes a number as an input and is called either at the creation of this script to load level 1
 	 * or when a level is beaten or restarted. Will load all of the triangles at once and hide the
 	 * ones that aren't within 3 away of a shot behind the queue. This method must be called when a 
-	 * level is beaten or restarted. 
+	 * level is beaten or restarted. It will call level parser to get the level information for the queue
 	 */
-	public void loadLevel(int num) {
-		if(num == 1) {
-			inQueue = new GameObject[level1.Length];
-		}
-		else if(num == 2) {
-			inQueue = new GameObject[level2.Length];
-		}
-		else if(num == 3) {
-			inQueue = new GameObject[level3.Length];
-		}
-		else if(num == 4) {
-			inQueue = new GameObject[level4.Length];
-		}
-		else if(num == 5) {
-			inQueue = new GameObject[level5.Length];
-		}
+	public void loadLevel() {
+		LevelParser parser = GameObject.FindGameObjectWithTag ("GameManager").GetComponentInChildren<LevelParser>(); 
+		string [] queueTris = parser.getQueueArray ();
+
+		inQueue = new GameObject[queueTris.Length];
 
 		GameObject triInstance = null;
 		
 		float yLoc = 0.0f;
 		for(int i = 0; i < inQueue.Length; i++) {
+			if(queueTris[i].Equals(RED)) {
+				triInstance = (GameObject) Instantiate(redQueueTriangle);
+			}
+			else if(queueTris[i].Equals(GREEN)) {
+				triInstance = (GameObject) Instantiate(greenQueueTriangle);
+			}
+			else if(queueTris[i].Equals(BLUE)) {
+				triInstance = (GameObject) Instantiate(blueQueueTriangle);
+			}
+			else if(queueTris[i].Equals(AQUA)) {
+				triInstance = (GameObject) Instantiate(aquaQueueTriangle);
+			}
+			else if(queueTris[i].Equals(PINK)) {
+				triInstance = (GameObject) Instantiate(pinkQueueTriangle);
+			}
+			else {
+				triInstance = (GameObject) Instantiate(yellowQueueTriangle);
+			}
+
 			if (i < 3) {
 				yLoc += distance;
-
-				if(num == 1) {
-					triInstance = (GameObject) Instantiate(level1[i]);
-				}
-				else if(num == 2) {
-					triInstance = (GameObject) Instantiate(level2[i]);
-				}
-				else if(num == 3) {
-					triInstance = (GameObject) Instantiate(level3[i]);
-				}
-				else if(num == 4) {
-					triInstance = (GameObject) Instantiate(level4[i]);
-				}
-				else if(num == 5) {
-					triInstance = (GameObject) Instantiate(level5[i]);
-				}
-
 				triInstance.transform.localPosition = new Vector3(6.0f, yLoc, -1.5f);
 			}
 			else {
-				triInstance = (GameObject) Instantiate(level1[i]);
 				triInstance.transform.localPosition = new Vector3(6.0f, yLoc, 1.0f);
 			}
 			
