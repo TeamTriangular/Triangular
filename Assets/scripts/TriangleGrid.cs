@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TriangleGrid : MonoBehaviour {
 
@@ -11,7 +12,10 @@ public class TriangleGrid : MonoBehaviour {
 	// use getNode to access. uses euclidian coordinates. 0,0 is th center triangle
 	private triangleNode[,] grid;
 	private System.Collections.Generic.List<triangleNode> gridOutline;
-	
+
+	//This is used because we temporarily need to remove the center from the grid
+	//when cascading to avoid infinit recursion
+	private triangleNode tempStoreCenter;
 
 	private class triangleNode
 	{
@@ -285,10 +289,42 @@ public class TriangleGrid : MonoBehaviour {
 		Color c = center.triangleObject.GetComponent<TriangleColour>().GetColour();
 		triangleNode n;
 
-		if(isPointingUp(center))
+		if( c != Color.black)
 		{
-			//check upper node
-			n = getNode(center.x, center.y - 1);
+			if(isPointingUp(center))
+			{
+				//check upper node
+				n = getNode(center.x, center.y - 1);
+				if(n !=null && 
+				   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+				   != Color.black)
+				{
+					n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+				}
+			}
+			else
+			{
+				//check lower node
+				n = getNode(center.x, center.y + 1);
+				if(n !=null && 
+				   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+				   != Color.black)
+				{
+					n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+				}
+			}
+		
+			//check left node
+			n = getNode(center.x - 1, center.y);
+			if(n !=null && 
+			   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
+			   != Color.black)
+			{
+				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
+			}
+		
+			//check right node
+			n = getNode(center.x + 1, center.y);
 			if(n !=null && 
 			   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
 			   != Color.black)
@@ -296,36 +332,6 @@ public class TriangleGrid : MonoBehaviour {
 				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
 			}
 		}
-		else
-		{
-			//check lower node
-			n = getNode(center.x, center.y + 1);
-			if(n !=null && 
-			   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
-			   != Color.black)
-			{
-				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
-			}
-		}
-		
-		//check left node
-		n = getNode(center.x - 1, center.y);
-		if(n !=null && 
-		   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
-		   != Color.black)
-		{
-			n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
-		}
-		
-		//check right node
-		n = getNode(center.x + 1, center.y);
-		if(n !=null && 
-		   n.triangleObject.GetComponent<TriangleColour>().GetColour() 
-		   != Color.black)
-		{
-			n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
-		}
-
 		CascadeAndClear(center);
 	}
 
@@ -334,16 +340,27 @@ public class TriangleGrid : MonoBehaviour {
 		bool isUpwards = isPointingUp(center);
 		int x = center.x;
 		int y = center.y;
-
-		Destroy (center.triangleObject);
 		Vector2 realCords = getRealCoords(x , y);
-		grid[(int)realCords.x, (int)realCords.y] = null;
 		triangleNode n;
+
+		if(center.triangleObject.GetComponent<TriangleColour>().GetColour() 
+		   != Color.black)
+		{
+			Destroy (center.triangleObject);
+			grid[(int)realCords.x, (int)realCords.y] = null;
+		}
+		else
+		{
+			//temporarily remove the center from the grid
+			tempStoreCenter = grid[(int)realCords.x, (int)realCords.y];
+			grid[(int)realCords.x, (int)realCords.y] = null;
+		}
 
 		if(isUpwards)
 		{
 			n = getNode(x, y - 1);
-			if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+			if(n != null &&	
+			   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 			   != Color.black)
 			{
 				CheckForGreaterTriangle(n);
@@ -355,7 +372,8 @@ public class TriangleGrid : MonoBehaviour {
 		else
 		{
 			n = getNode(x, y + 1);
-			if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+			if(n != null &&	
+			   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 			   != Color.black)
 			{
 				CheckForGreaterTriangle(n);
@@ -367,7 +385,8 @@ public class TriangleGrid : MonoBehaviour {
 
 		// Left Node
 		n = getNode(x - 1, y);
-		if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+		if(n != null &&	
+		   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 		   != Color.black)
 		{
 			CheckForGreaterTriangle(n);
@@ -378,7 +397,8 @@ public class TriangleGrid : MonoBehaviour {
 
 		// Right Node
 		n = getNode(x + 1, y);
-		if(n.triangleObject.GetComponent<TriangleColour>().GetColour()
+		if(n != null &&	
+		   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 		   != Color.black)
 		{
 			CheckForGreaterTriangle(n);
@@ -386,6 +406,106 @@ public class TriangleGrid : MonoBehaviour {
 			realCords = getRealCoords(n.x , n.y);
 			grid[(int)realCords.x, (int)realCords.y] = null;
 		}
+		//Remove any triangles stranded by this action
+		RemoveStranded();
+	}
+
+	/// <summary>
+	/// Checks for any nodes not connected to the center and removes them
+	/// </summary>
+	private void RemoveStranded()
+	{
+		//if the center was temporarily removed, return it to the grid
+		if( tempStoreCenter != null)
+		{
+			Vector2 centerCoord = getRealCoords(0,0);
+			grid[(int)centerCoord.x, (int)centerCoord.y] = tempStoreCenter;
+			tempStoreCenter = null;
+		}
+
+		triangleNode center = getNode(0, 0);
+		foreach( triangleNode n in grid)
+		{
+			if(n != null)
+			{
+				if(!AStar(n,center))
+				{
+					Destroy (n.triangleObject);
+					Vector2 realCords = getRealCoords(n.x , n.y);
+					grid[(int)realCords.x, (int)realCords.y] = null;
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// Searches for a path from start to goal
+	/// </summary>
+	/// <returns><c>true</c> if a path exists <c>false</c> otherwise.</returns>
+	/// <param name="start">Starting node</param>
+	/// <param name="goal">Goal node</param>
+	private bool AStar(triangleNode start, triangleNode goal)
+	{
+		IList<triangleNode> closedSet = new List<triangleNode>();
+		IList<triangleNode> openSet = new List<triangleNode>();
+		openSet.Add(start);
+		triangleNode current;
+		triangleNode n;
+
+		while (openSet.Count != 0)
+		{
+			current = openSet[0];
+
+			if (current.Equals(goal))
+			{
+				return true;
+			}
+			
+			closedSet.Add(current);
+			openSet.Remove(current);
+
+			if(isPointingUp(current))
+			{
+				if(current.y - 1 > -gridSize/2)
+				{
+					n = getNode(current.x, current.y - 1);
+					if ( n != null && !closedSet.Contains(n))
+					{
+						openSet.Add(n);
+					}
+				}
+			}
+			else
+			{
+				if(current.y + 1 < gridSize/2)
+				{
+					n = getNode(current.x, current.y + 1);
+					if ( n != null && !closedSet.Contains(n))
+					{
+						openSet.Add(n);
+					}
+				}
+			}
+			//check left
+			if(current.x - 1 > -gridSize/2)
+			{
+				n = getNode(current.x - 1, current.y);
+				if ( n != null && !closedSet.Contains(n))
+				{
+					openSet.Add(n);
+				}
+			}
+			//check right
+			if(current.x + 1 < gridSize/2)
+			{
+				n = getNode(current.x + 1, current.y);
+				if ( n != null && !closedSet.Contains(n))
+				{
+					openSet.Add(n);
+				}
+			}
+		}
+		return false;
 	}
 
 	private triangleNode getNode(int x, int y)
