@@ -2,16 +2,17 @@
 using System.Collections;
 
 public class attraction : MonoBehaviour {
-	public float rotationSpeed = 1.0f;
+	public float rotationSpeed = 1.0f; // the speed at which the trinagle rotates to face what it is being attracted to
+	public float attractionDistance = 1.5f; // the distance before a static triangle's gravity can effect a free floating one
+	public float pullFactor = 1.0f; // strength of pull
+	public float connectionDist = 0.1f;
 
-	public float pullFactor = 1.0f;
-
-	Transform[] cornerPoints;
-	Transform[] centerPoints;
+	System.Collections.Generic.List<Transform> cornerPoints;
+	System.Collections.Generic.List<Transform> centerPoints;
+	System.Collections.Generic.List<Transform> ignoredPoints;
 	Vector3[] faceNormals = new Vector3[3];
-	System.Collections.Generic.List<Connection> joints;
+
 	public TriangleGrid gridScript;
-	bool currentlyColliding = false; //true if the triangle is making contact with another triangle
 
 	/**
 	 * Represents a PullForce will all variables needed for one. 
@@ -22,17 +23,17 @@ public class attraction : MonoBehaviour {
 	 */
 	public struct PullForce
 	{
-		public Vector3 applyPos;
-		public Vector3 dstPos;
+		public Transform applyObj;
+		public Transform dstObj;
 		public Vector3 force;	
-		public float dist;
+		public float dist;	
 		
-		public PullForce(Vector3 applyPos_, Vector3 dstPos_, Vector3 force_)
+		public PullForce(Transform applyObj_, Transform dstObj_, Vector3 force_)
 		{
-			applyPos = applyPos_;
-			dstPos = dstPos_;
+			applyObj = applyObj_;
+			dstObj = dstObj_;
 			force = force_;
-			dist = Vector3.Distance(applyPos_, dstPos_);
+			dist = Vector3.Distance(applyObj.position, dstObj_.position);
 		}
 	};
 
@@ -57,27 +58,21 @@ public class attraction : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		cornerPoints = new Transform[3];
-		centerPoints = new Transform[3];
-		
-		int cornerIndex = 0;
-		int centerIndex = 0;
+		cornerPoints = new System.Collections.Generic.List<Transform>();
+		centerPoints = new System.Collections.Generic.List<Transform>();
+		ignoredPoints = new System.Collections.Generic.List<Transform>();
 		
 		for(int i=0; i< transform.childCount; i++)
 		{
 			if(transform.GetChild(i).tag == "CornerControlPoint")
 			{
-				cornerPoints[cornerIndex] = transform.GetChild(i);
-				cornerIndex++;
+				cornerPoints.Add(transform.GetChild(i));
 			}
 			else if(transform.GetChild(i).tag == "MiddleControlPoint")
 			{
-				centerPoints[centerIndex] = transform.GetChild(i);
-				centerIndex++;
+				centerPoints.Add(transform.GetChild(i));
 			}
 		}
-		
-		joints = new System.Collections.Generic.List<Connection>();
 
 		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 
@@ -85,192 +80,224 @@ public class attraction : MonoBehaviour {
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
-
+		updateIgnorePoints();
+	}
+	
+	void updateIgnorePoints()
+	{
+		ignoredPoints.Clear();
+		
+		FixedJoint[] neighbours = GetComponents<FixedJoint>();
+		System.Collections.Generic.List<Rigidbody> visitedNodes = new System.Collections.Generic.List<Rigidbody>();
+		visitedNodes.Add (rigidbody); // add ourself so we dont visit ourself
+		
+		addNeighbours(neighbours, visitedNodes);
+	}
+	
+	void addNeighbours(FixedJoint[] neighbours, System.Collections.Generic.List<Rigidbody> visitedNodes)
+	{
+		
+		
+		//look through all neighbours we are connected to 
+		for(int i=0; i< neighbours.Length; i++)
+		{
+			bool alreadyExists = false;
+			//check if we have already visited the triangle
+			for(int k=0; k< visitedNodes.Count; k++)
+			{
+				if(visitedNodes[k] == neighbours[i].connectedBody )
+				{
+					alreadyExists = true;
+					break;
+				}
+			}
+			
+			//if we have not visited the triange then add the control points for the triangle to the ignore list
+			if(!alreadyExists)
+			{
+				visitedNodes.Add(neighbours[i].connectedBody);
+				for(int k=0; k < neighbours[i].connectedBody.transform.childCount; k++)
+				{
+					ignoredPoints.Add(neighbours[i].connectedBody.transform.GetChild(k));
+				}
+				
+				//call recursivly for his neighbours
+				addNeighbours(neighbours[i].gameObject.GetComponents<FixedJoint>(), visitedNodes);
+			}
+		}
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () 
 	{
-		//apply forces for attraction
-		applyForces();			
-		
-		if(joints.Count > 0)
-		{
-			GlobalFlags.canFire = true;
-			gridScript.connectTriangle(joints[0].connectedTriangle.gameObject, gameObject);
-			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-			enabled = false;
-		}
+		//apply forces for attraction if we cannot connect to anearby trinagle
+		applyForces();	
 	}
 	
-	void OnCollisionStay(Collision collision) 
-	{
-
-		if(enabled == false)
-		{
-			return;
-		}
-
-		if(collision.gameObject.tag == "Triangle" && collision.gameObject.transform.childCount >0)
-		{
-			for(int i=0; i< cornerPoints.Length; i++)
-			{
-				for(int j=0; j< (cornerPoints.Length + centerPoints.Length); j++)
-				{
-					if(collision.gameObject.transform.GetChild(j).tag == "MiddleControlPoint" &&
-						isCornerTouching(centerPoints[i].position, collision.gameObject.transform.GetChild(j).position))
-					{
-						//lock triangles
-						attemptFormConnection(centerPoints[i].transform, collision.gameObject.transform.GetChild(j), collision.gameObject.transform);
-					}
-				}
-			}
-		}
-	}
-	
-	void OnCollisionEnter(Collision collision)
-	{
-		if(collision.gameObject.tag == "Triangle")
-		{
-			currentlyColliding = true;
-		}
-	}
-	
-	void OnCollisionExit(Collision collision)
-	{
-        if(collision.gameObject.tag == "Triangle")
-		{
-			currentlyColliding = false;
-		}
-    }
 
 	/**
-	 * @param Transform t1 the point of the original triangle that a connection will tried to be made on
-	 * @param Transform t2 point of colliding triangle
-	 * @param Transform CollisionObj is the colliding triangle
+	 * @param Transform CollisionObj is the colliding triangle.
+	 * If there exists triangle attacted to this one, chain through them to connected them to grid
 	 */
-	void attemptFormConnection(Transform t1, Transform t2, Transform collisionObj)
+	void formConnection(Transform collisionObj)
 	{
-		for(int i=0; i< joints.Count; i++)
+		if(enabled)
 		{
-			//if joint for the connection exists we don't want to create another
-			if((joints[i].ctrlPoint1.position == t1.position) && (joints[i].ctrlPoint2.position == t2.position))
+		
+			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+			gridScript.connectTriangle(collisionObj.gameObject, gameObject);
+			enabled = false;
+			GlobalFlags.canFire = true;
+			
+			FixedJoint[] hinges = GetComponents<FixedJoint>();
+			
+			for(int i=0; i<hinges.Length; i++)
 			{
-				return;
-			}		
-			else
-			{
-				//Debug.Log ((joints[i].ctrlPoint1.position - t1.position) + ", " + (joints[i].ctrlPoint2.position - t2.position));
+				Rigidbody r = hinges[i].connectedBody;
+				DestroyImmediate(hinges[i]);
+				
+				r.GetComponent<attraction>().formConnectionChain(transform);
 			}
 		}
 		
-		Vector3 test = t2.position - t1.position;
-		transform.position =  transform.position + test;
+	}
+	
+	//only called from another triangle. purpose to to lock to grid when a trinangle
+	//connected to this one also connected to the grid
+	public void formConnectionChain(Transform collisionObj)
+	{
+		FixedJoint[] hinges = GetComponents<FixedJoint>();
+			
+		for(int i=0; i<hinges.Length; i++)
+		{
+			if(hinges[i].connectedBody == collisionObj)
+			{
+				DestroyImmediate(hinges[i]);
+			}
+		}
 		
-		joints.Add(new Connection(t1, t2, collisionObj));
+		formConnection(collisionObj);
+	}
+	
+	//given our position and taget position, find smallest rotation to face that point
+	float findSmallestRotation(Vector3 targetPos, Vector3 myPos, float angle)
+	{
+		float smallestRot = angle;
+		//find polarity
+		Vector3 cross = Vector3.Cross(new Vector3(0, 0, 1), transform.rotation * faceNormals[0]);
+		float dotProduct = Vector3.Dot(cross, targetPos - myPos);
+		bool negative = dotProduct < 0;
+
+		for(int i=1; i < faceNormals.Length; i++)
+		{
+			float rotToFace = Vector3.Angle((transform.rotation * faceNormals[i]).normalized, (targetPos - myPos).normalized);
+
+			if(smallestRot > rotToFace)
+			{
+				smallestRot = rotToFace;
+				//find polarity
+				cross = Vector3.Cross(new Vector3(0, 0, 1), transform.rotation * faceNormals[i]);
+				dotProduct = Vector3.Dot(cross, targetPos - myPos);
+				negative = dotProduct < 0;
+			}
+		}
+		
+		if(negative)
+		{
+			return -smallestRot;
+		}
+		else
+		{
+			return smallestRot;
+		}
 	}
 
 	void applyForces()
 	{
-		PullForce[] centerForces = new PullForce[3];
-		PullForce[] lowestCenterForces =  new PullForce[3];
-		PullForce[] cornerForces = new PullForce[3];
-		PullForce[] lowestCornerForces =  new PullForce[3];
+		System.Collections.Generic.List<PullForce> centerForces = new System.Collections.Generic.List<PullForce>();
+		System.Collections.Generic.List<PullForce> lowestCenterForces = new System.Collections.Generic.List<PullForce>();
+		System.Collections.Generic.List<PullForce> cornerForces = new System.Collections.Generic.List<PullForce>();
+		System.Collections.Generic.List<PullForce> lowestCornerForces =  new System.Collections.Generic.List<PullForce>();
 
-		for(int i=0; i< centerPoints.Length; i++)
+		for(int i=0; i< centerPoints.Count; i++)
 		{
-			centerForces[i] = getForceForPoint(centerPoints[i], false);
-			cornerForces[i] = getForceForPoint(cornerPoints[i], true);
+			centerForces.Add(getForceForPoint(centerPoints[i], false));
+			cornerForces.Add(getForceForPoint(cornerPoints[i], true));
 		}
 		
+		//sort to find strongest forces
 		lowestCenterForces = sortForces(centerForces);
 		lowestCornerForces = sortForces(cornerForces);
 
-		// only force to attract triangle
 		float forceMult = 1f;
 		Vector3 finalForce = Vector3.zero;
 		
-		int numberOfCornerForces = 2;
-		
-		if(lowestCornerForces[0].dist < 1) //change priority of attraction point depending on distance. not done yet
+		//if we are close to a attraction point, attract to it. otherwise attract toward 0,0,0
+		if(lowestCenterForces.Count > 0)
 		{
-//			numberOfCornerForces = 1;
-//			forcemult = 2;
-		}
-		
-		for(int i=0; i< numberOfCornerForces; i++)
-		{
-			//finalForce += lowestCornerForces[i].force * forcemult;
-		}
-		
-		
-		for(int i=0; i< 1; i++)
-		{	
-			finalForce += lowestCenterForces[i].force;
-			//GetComponent<Rigidbody>().AddForce(lowestCenterForces[i].force * forcemult);	
-		}
-		
-		if(lowestCenterForces[0].dist > 0)
-		{
-			forceMult = 1/(lowestCenterForces[0].dist);
-			forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
-		}
-		
-		GetComponent<Rigidbody>().AddForce(finalForce * forceMult);	
-
-		//if we are not colliding try to rotate to face the closest triangle
-		//if(!currentlyColliding || true)
-		{
-			float smallestRot = Vector3.Angle((transform.rotation * faceNormals[0]).normalized, (lowestCenterForces[0].dstPos - transform.position).normalized);
-			//find polarity
-			Vector3 cross = Vector3.Cross(new Vector3(0, 0, 1), transform.rotation * faceNormals[0]);
-			float dotProduct = Vector3.Dot(cross, lowestCenterForces[0].dstPos - transform.position);
-			bool negative = dotProduct < 0;
-
-			for(int i=1; i < faceNormals.Length; i++)
+			finalForce = lowestCenterForces[0].force;
+			
+			if(lowestCenterForces[0].dist > 0)
 			{
-				float rotToFace = Vector3.Angle((transform.rotation * faceNormals[i]).normalized, (lowestCenterForces[0].dstPos - transform.position).normalized);
-	
-				if(smallestRot > rotToFace)
-				{
-					smallestRot = rotToFace;
-					//find polarity
-					cross = Vector3.Cross(new Vector3(0, 0, 1), transform.rotation * faceNormals[i]);
-					dotProduct = Vector3.Dot(cross, lowestCenterForces[0].dstPos - transform.position);
-					negative = dotProduct < 0;
-				}
+				forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
 			}
 			
-			if(negative)
+		}
+		else
+		{
+			finalForce = pullFactor*((Vector3.zero - transform.position).normalized);
+		}
+		
+		rigidbody.AddForce(finalForce * forceMult);	
+		
+		
+		//if we are close to a point, try to face it. otherwise try to face center
+		
+		Vector3 targetLookPoint = Vector3.zero;			
+		float rot;
+		
+		if(lowestCenterForces.Count > 0)
+		{
+			rot = Vector3.Angle((transform.rotation * faceNormals[0]).normalized, (lowestCenterForces[0].dstObj.position - transform.position).normalized);
+			rot = findSmallestRotation(lowestCenterForces[0].dstObj.position, transform.position, rot);
+		}
+		else
+		{
+			rot = Vector3.Angle((transform.rotation * faceNormals[0]).normalized, (Vector3.zero - transform.position).normalized);
+			rot = findSmallestRotation(new Vector3(0, 0, 0), transform.position, rot);
+		}
+		
+		if(rot < 0)
+		{
+			if(rot > Time.deltaTime * rotationSpeed)
 			{
-				if(smallestRot < Time.deltaTime * rotationSpeed)
-				{
-					transform.Rotate(new Vector3(0, 0, -smallestRot));
-				}
-				else
-				{
-					transform.Rotate(new Vector3(0, 0, Time.deltaTime * -rotationSpeed));
-				}
+				transform.Rotate(new Vector3(0, 0, rot));
 			}
 			else
 			{
-				if(smallestRot < Time.deltaTime * rotationSpeed)
-				{
-					transform.Rotate(new Vector3(0, 0, smallestRot));
-				}
-				else
-				{
-					transform.Rotate(new Vector3(0, 0, Time.deltaTime * rotationSpeed));
-				}
+				transform.Rotate(new Vector3(0, 0, Time.deltaTime * -rotationSpeed));
 			}
 		}
-	}
-	
-	bool isCornerTouching(Vector3 c1, Vector3 c2)
-	{
-		c1.z = 0;
-		c2.z = 0;
-		return (Vector3.Distance(c1, c2) < 0.1f);
+		else
+		{
+			if(rot < Time.deltaTime * rotationSpeed)
+			{
+				transform.Rotate(new Vector3(0, 0, rot));
+			}
+			else
+			{
+				transform.Rotate(new Vector3(0, 0, Time.deltaTime * rotationSpeed));
+			}
+		}
+		
+		//if we are close enough to triangle, lock to it
+		if(lowestCenterForces.Count > 0)
+		{
+			if(Vector3.Distance(lowestCenterForces[0].dstObj.position, lowestCenterForces[0].applyObj.position) < connectionDist)
+			{
+				formConnection(lowestCenterForces[0].dstObj.parent);
+			}
+		}
 	}
 
 	/**
@@ -297,7 +324,7 @@ public class attraction : MonoBehaviour {
 		
 		for(int i=0; i< points.Length; i++)
 		{
-			double newDist = Vector3.Distance(o.position, points[i].transform.position);
+			double newDist = Vector3.Distance(o.position, points[i].transform.position) + 0.001f;
 			if(!shouldIgnore(points[i]) && ((dist == -1) || (newDist< dist)))
 			{
 				closestPoint = points[i].transform;
@@ -305,16 +332,15 @@ public class attraction : MonoBehaviour {
 			}
 		}
 		
-		//make sure it found a point that is closest
-		if(dist != -1)
+		if(dist < attractionDistance && dist != -1)
 		{
 			Vector3 force = (closestPoint.position - o.position);
 			
-			return new PullForce(o.position, closestPoint.position, force);
+			return new PullForce(o, closestPoint, force);
 		}
 		
 		// return max force so it is never chosen as the lowest force. this is the equivlant to null
-		return new PullForce(Vector3.zero, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue ), new Vector3(float.MaxValue, float.MaxValue, float.MaxValue )); 
+		return new PullForce(transform, transform, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue )); 
 	}
 
 	/**
@@ -328,19 +354,38 @@ public class attraction : MonoBehaviour {
 			return true;
 		}
 		
+		for(int i=0; i<ignoredPoints.Count; i++)
+		{
+			if(ignoredPoints[i] == o.transform)
+			{
+				return true;
+			}
+		}
+		
 		return false;
 	}
 	
 	// use selection sort to return a sort list of the pull forces
 	// sorted from smallest to largest
-	PullForce[] sortForces(PullForce[] a)
+	System.Collections.Generic.List<PullForce> sortForces(System.Collections.Generic.List<PullForce> a)
 	{
+		//remove any null entries
+		for(int k = 0; k< a.Count; k++)
+		{
+			if(a[k].force == new Vector3(float.MaxValue, float.MaxValue, float.MaxValue))
+			{
+				a.RemoveAt(k);
+				k--;
+			}
+		}
+		
+		//sort list
 		int i,j;
 		int iMin;
 		 
-		for (j = 0; j < a.Length - 1; j++) {
+		for (j = 0; j < a.Count - 1; j++) {
 		    iMin = j;
-		    for ( i = j+1; i < a.Length; i++) {
+		    for ( i = j+1; i < a.Count; i++) {
 		        if (a[i].dist < a[iMin].dist) {
 		            iMin = i;
 		        }
