@@ -7,7 +7,6 @@ public class attraction : MonoBehaviour {
 	public float pullFactor = 1.0f; // strength of pull
 	public float connectionDist = 0.1f;
 
-	System.Collections.Generic.List<Transform> cornerPoints;
 	System.Collections.Generic.List<Transform> centerPoints;
 	System.Collections.Generic.List<Transform> ignoredPoints;
 	Vector3[] faceNormals = new Vector3[3];
@@ -37,38 +36,14 @@ public class attraction : MonoBehaviour {
 		}
 	};
 
-	/**
-	 * Adds a connection between this triangle and the colliding triangle. 
-	 * @param Transform ctrlPoint1 is the point which the original triangle is joining the colliding one on.
-	 * @param Transform ctrlPoint2 is the point which the colliding triangle is joining on
-	 */
-	public struct Connection
-	{
-		public Transform ctrlPoint1;
-		public Transform ctrlPoint2;
-		public Transform connectedTriangle;
-		
-		public Connection(Transform p1, Transform p2, Transform connectedTriangle_)
-		{
-			ctrlPoint1 = p1;
-			ctrlPoint2 = p1;
-			connectedTriangle = connectedTriangle_;
-		}
-	};
-
 	// Use this for initialization
 	void Awake () {
-		cornerPoints = new System.Collections.Generic.List<Transform>();
 		centerPoints = new System.Collections.Generic.List<Transform>();
 		ignoredPoints = new System.Collections.Generic.List<Transform>();
 		
 		for(int i=0; i< transform.childCount; i++)
 		{
-			if(transform.GetChild(i).tag == "CornerControlPoint")
-			{
-				cornerPoints.Add(transform.GetChild(i));
-			}
-			else if(transform.GetChild(i).tag == "MiddleControlPoint")
+			if(transform.GetChild(i).tag == "MiddleControlPoint")
 			{
 				centerPoints.Add(transform.GetChild(i));
 			}
@@ -216,18 +191,14 @@ public class attraction : MonoBehaviour {
 	{
 		System.Collections.Generic.List<PullForce> centerForces = new System.Collections.Generic.List<PullForce>();
 		System.Collections.Generic.List<PullForce> lowestCenterForces = new System.Collections.Generic.List<PullForce>();
-		System.Collections.Generic.List<PullForce> cornerForces = new System.Collections.Generic.List<PullForce>();
-		System.Collections.Generic.List<PullForce> lowestCornerForces =  new System.Collections.Generic.List<PullForce>();
 
 		for(int i=0; i< centerPoints.Count; i++)
 		{
 			centerForces.Add(getForceForPoint(centerPoints[i], false));
-			cornerForces.Add(getForceForPoint(cornerPoints[i], true));
 		}
 		
 		//sort to find strongest forces
 		lowestCenterForces = sortForces(centerForces);
-		lowestCornerForces = sortForces(cornerForces);
 
 		float forceMult = 1f;
 		Vector3 finalForce = Vector3.zero;
