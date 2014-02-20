@@ -206,8 +206,7 @@ public class attraction : MonoBehaviour {
 		//if we are close to a attraction point, attract to it. otherwise attract toward 0,0,0
 		if(lowestCenterForces.Count > 0)
 		{
-			finalForce = lowestCenterForces[0].force;
-			
+			finalForce = lowestCenterForces[0].force;			
 			if(lowestCenterForces[0].dist > 0)
 			{
 				forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
