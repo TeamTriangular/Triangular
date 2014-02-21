@@ -108,17 +108,15 @@ public class TriangleGrid : MonoBehaviour {
 		setNode(x, y, tempObj);
 		setCorrectPosition(getNode(x, y));
 	}
-
-	//attatches new triangle to old triangle
-	public void connectTriangle(GameObject oldTriangle, GameObject newTriangle)
+	
+	Vector2 getBestPlaceOnGrid(GameObject oldTriangle, GameObject newTriangle)
 	{
-
 		triangleNode oldNode = getNode(oldTriangle);
 
 		if(oldNode == null)
 		{
 			Debug.Log("could not find stationary triangle to attatch triange to");
-			return;
+			return new Vector2(0, 0);
 		}
 
 		//find the position closest to the new triangle around the possible locations for the new triangle to attatch
@@ -149,14 +147,38 @@ public class TriangleGrid : MonoBehaviour {
 		if(x == int.MaxValue || y == int.MaxValue)
 		{
 			Debug.Log("all sides of the base triangle are taken. not able to attatch triangle");
-			return;
+			return new Vector2(0, 0);
 		}
+		
+		
+		return new Vector2(x, y);
+	}
+	
+	public Vector3 closestAvailablePos(GameObject oldTriangle, GameObject newTriangle)
+	{
+		Vector2 gridPos = getBestPlaceOnGrid(oldTriangle, newTriangle);
+		
+		return getBasePosition((int)gridPos.x, (int)gridPos.y);
+	}
+
+	public Vector3 closestAvailableRot(GameObject oldTriangle, GameObject newTriangle)
+	{
+		Vector2 gridPos = getBestPlaceOnGrid(oldTriangle, newTriangle);
+		
+		return getBaseRot((int)gridPos.x, (int)gridPos.y);
+	}
+	
+	//attatches new triangle to old triangle
+	public void connectTriangle(GameObject oldTriangle, GameObject newTriangle)
+	{
+
+		Vector2 gridPos = getBestPlaceOnGrid(oldTriangle, newTriangle);
 
 		//attatch the new triangle to the side of the oldtriangle closest
-		setNode(x, y, newTriangle);
-		setCorrectPosition(getNode(x, y));
+		setNode((int)gridPos.x, (int)gridPos.y, newTriangle);
+		setCorrectPosition(getNode((int)gridPos.x, (int)gridPos.y));
 		//checking for a Greater Triangle
-		CheckForGreaterTriangle(getNode(x, y));
+		CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y));
 	}
 
 	/// <summary>
@@ -560,20 +582,23 @@ public class TriangleGrid : MonoBehaviour {
 	private void setCorrectPosition(triangleNode n)
 	{
 		Vector3 pos = getBasePosition(n.x, n.y);
-
-		//if it should be pointing down, rotate by 180
-		if(isPointingUp(n))
+	
+		n.triangleObject.transform.rotation = Quaternion.Euler(getBaseRot(n.x, n.y));	
+		n.triangleObject.transform.position = pos;
+	}	
+	
+	private Vector3 getBaseRot(int x, int y)
+	{
+		if(isPointingUp(x, y))
 		{			
-			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+			return new Vector3(0, 0, 0);
 		}
 		else
 		{	
-			n.triangleObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 180));
+			return new Vector3(0, 0, 180);
 		}
-		
-		n.triangleObject.transform.position = pos;
-	}	
-
+	}
+	
 	private Vector3 getBasePosition(int x, int y)
 	{
 		float xOffset = x * 0.5f ;
