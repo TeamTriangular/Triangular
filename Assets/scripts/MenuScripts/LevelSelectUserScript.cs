@@ -29,7 +29,7 @@ public class LevelSelectUserScript : MonoBehaviour {
 		halfScreenW = (Screen.width/2) + 55;
 		halfScreenH = Screen.height/2 + 0;
 		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW+30,buttonH),"Build Your Own")){
-			Application.LoadLevel("game");
+			Application.LoadLevel("userEditor");
 		}
 		
 		//set the back button

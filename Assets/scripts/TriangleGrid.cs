@@ -7,6 +7,8 @@ public class TriangleGrid : MonoBehaviour {
 	public GameObject rootTriangle;
 	public GameObject trianglePrefab;
 	public GameObject triangleOutlinePrefab;
+	public bool doShowGrid;
+	public bool inEditMode;
 
 	int gridSize = 0;
 	// use getNode to access. uses euclidian coordinates. 0,0 is th center triangle
@@ -46,14 +48,52 @@ public class TriangleGrid : MonoBehaviour {
 		}
 
 		setNode(0, 0, rootTriangle);
-		
-		loadLevel(1);
+
+		if(doShowGrid)
+		{
+			showGrid();
+		}
+		if(!inEditMode)
+		{
+			loadLevel(1);
+		}
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-	
+		if(inEditMode && Input.GetMouseButtonUp(0))
+		{
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hitInfo;
+			if(Physics.Raycast(ray,out hitInfo))
+			{
+				if(hitInfo.collider.gameObject.tag == "gridPanel")
+				{
+					triangleNode node = findOutlineNode(hitInfo.collider.gameObject.transform.parent.gameObject);
+					if(node != null && GetComponent<HandleUI>().IsAdding())
+					{
+						string c = GetComponent<HandleUI>().GetColourString();
+						Vector2 realCoords = getRealCoords(node.x, node.y);
+						if(grid[(int)realCoords.x,(int)realCoords.y] == null)
+						{
+							createTriangleOnGrid(node.x, node.y, c);
+						}
+					}
+				}
+				else if(hitInfo.collider.gameObject.tag == "Triangle")
+				{
+					triangleNode node = getNode(hitInfo.collider.gameObject);
+					if(node != null && !GetComponent<HandleUI>().IsAdding()
+					   && !(node.x == 0 && node.y == 0))
+					{
+						Vector2 realCoords = getRealCoords(node.x, node.y);
+						grid[(int)realCoords.x,(int)realCoords.y] = null;
+						Destroy(hitInfo.collider.gameObject);
+					}
+				}
+			}
+		}
 	}
 	
 	public void showGrid()
@@ -84,7 +124,7 @@ public class TriangleGrid : MonoBehaviour {
 
 		for (int i = 0; i < triArray.Length; i++) {
 			LevelParser.TriInfo temp = triArray[i];
-			createTriangleOnGrid(temp.getX(), temp.getY());
+			createTriangleOnGrid(temp.getX(), temp.getY(), temp.getColour());
 		}
 	}
 	
@@ -97,14 +137,27 @@ public class TriangleGrid : MonoBehaviour {
 		
 		gridOutline.Clear();
 	}
+
+	private triangleNode findOutlineNode(GameObject obj)
+	{
+		for(int i=0; i< gridOutline.Count; i++)
+		{
+			if(gridOutline[i].triangleObject.Equals(obj))
+			{
+				return gridOutline[i];
+			}
+		}
+		return null;
+	}
 	
 	//adds a triangle to the grid. used for the prexisting triangles of a level
-	private void createTriangleOnGrid(int x, int y)
+	private void createTriangleOnGrid(int x, int y, string colour)
 	{
 		GameObject tempObj = (GameObject)Instantiate(trianglePrefab);
 		tempObj.GetComponent<attraction>().enabled = false;
 		tempObj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-		
+		tempObj.GetComponent<TriangleColour>().SetColourFromString(colour);
+
 		setNode(x, y, tempObj);
 		setCorrectPosition(getNode(x, y));
 	}
@@ -615,6 +668,28 @@ public class TriangleGrid : MonoBehaviour {
 	private bool isPointingUp(int x, int y)
 	{
 		return Mathf.Abs(x % 2) == Mathf.Abs(y % 2);
+	}
+
+	public string[,] toStringArray()
+	{
+		string [,] array = new string[gridSize,gridSize];
+		for(int i = 0; i < gridSize; i++)
+		{
+			for(int j = 0; j < gridSize; j++)
+			{
+				triangleNode n = grid[i,j];
+				if(n == null)
+				{
+					array[i,j] = "";
+				}
+				else
+				{
+					array[i,j] = n.triangleObject.GetComponent<TriangleColour>()
+						.GetCurrentColourAsString();
+				}
+			}
+		}
+		return array;
 	}
 
 	//for debugging purposes
