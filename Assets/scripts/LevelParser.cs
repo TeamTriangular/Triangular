@@ -152,6 +152,15 @@ public class LevelParser : MonoBehaviour {
 	}
 
 	/**
+	 * Function for determining if a triangle is pointing up or not
+	 * @param x the x value of the triangle
+	 * @param y, the y value of the triangle
+	 */
+	private bool isPointingUp(int x, int y) {
+		return Mathf.Abs(x % 2) == Mathf.Abs(y % 2);
+	}
+
+	/**
 	 * Gets the array that contains the colour of each triangle and the location in x y coordinates 
 	 */
 	public TriInfo [] getTriArray() {
