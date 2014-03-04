@@ -93,4 +93,45 @@ public class LevelParser : MonoBehaviour {
 		return queueTris;
 	}
 
+	public void CreateLevelFile(string levelName,string[] queue,string[,] grid)
+	{
+		string filename = "assets/levels/UserMade/" + levelName + ".txt";
+		if(System.IO.File.Exists(filename))
+		{
+			System.IO.File.Delete(filename);
+		}
+		//System.IO.File.Create(filename);
+
+		using (System.IO.StreamWriter sw = System.IO.File.AppendText(filename))
+		{
+			for(int i = 0; i < queue.Length; i++)
+			{
+				if(i != 0 )
+				{
+					sw.Write(",");
+				}
+				sw.Write(queue[i]);
+			}
+
+			int size = (int)Mathf.Sqrt(grid.Length);
+			for(int i = 0; i < size; i++)
+			{
+				for(int j = 0; j < size; j++)
+				{
+					if(!grid[i,j].Equals(""))
+					{
+						int x = i - size/2;
+						int y = size/2 - j;
+
+						if(!(x==0 && y==0))
+						{
+							string tri = "\n" + x + "," + y + ":" + grid[i,j];
+							sw.Write(tri);
+						}
+					}
+				}
+			}
+		}
+	}
+
 }

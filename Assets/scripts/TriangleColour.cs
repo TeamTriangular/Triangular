@@ -11,6 +11,13 @@ public class TriangleColour : MonoBehaviour {
 	public Material pink;
 	public Material red;
 	public Material yellow;
+	
+	public static readonly string RED = "r";
+	public static readonly string GREEN = "g";
+	public static readonly string BLUE = "b";
+	public static readonly string AQUA = "a";
+	public static readonly string PINK = "p";
+	public static readonly string YELLOW = "y";
 
 	//This is for testing...allows the materials to be changed on the fly
 	/*
@@ -79,6 +86,72 @@ public class TriangleColour : MonoBehaviour {
 		SetMaterial();
 	}
 
+	public void SetColourFromString(string s)
+	{
+		if(s.Equals(AQUA))
+		{
+			SetColour(Color.cyan);
+		}
+		else if(s.Equals(BLUE))
+		{
+			SetColour(Color.blue);
+		}
+		else if(s.Equals(GREEN))
+		{
+			SetColour(Color.green);
+		}
+		else if(s.Equals(RED))
+		{
+			SetColour(Color.red);
+		}
+		else if(s.Equals(YELLOW))
+		{
+			SetColour(Color.yellow);
+		}
+		else if(s.Equals(PINK))
+		{
+			SetColour(Color.magenta);
+		}
+		else
+		{
+			//Defaulting on blue
+			SetColour(Color.blue);
+		}
+	}
+
+	public string GetCurrentColourAsString()
+	{
+		if(colour == Color.cyan)
+		{
+			return AQUA;
+		}
+		if(colour == Color.blue)
+		{
+			return BLUE;
+		}
+		if(colour == Color.green)
+		{
+			return GREEN;
+		}
+		if(colour == Color.red)
+		{
+			return RED;
+		}
+		if(colour == Color.yellow)
+		{
+			return YELLOW;
+		}
+		if(colour == Color.magenta)
+		{
+			return PINK;
+		}
+		else
+		{
+			//Defaulting on blue
+			return BLUE;
+		}
+	}
+
 	private void SetMaterial()
 	{
 		if(colour == Color.cyan)
@@ -114,5 +187,5 @@ public class TriangleColour : MonoBehaviour {
 			Debug.Log("defaulting to blue");
 			renderer.material = blue;
 		}
-	}
+	}	
 }
