@@ -50,33 +50,105 @@ public class LevelParser : MonoBehaviour {
 
 	private string [] queueTris;
 
+	/*
+	 * tuning paramater for how far in each direction randomly generated triangles can go to.
+	 */
+	public static readonly int randomLength = 4;
+
+
+
 	/**
 	 * This has to be awake, as the levels have to be parsed before everything else calls the data
-	 * from the file. 
+	 * from the file. Depending on if the RandomLevel flag is flipped in the @GlobalFlag.cs class, 
+	 * then a level will be generated randomly and without the use of a file.
 	 */
 	void Awake() {
-		//TODO Once we have levels being set globally, get the level here from the global variables. 
-		try {
+		bool randomLevel = GlobalFlags.getRandLevel ();
 
-			string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + 1  + ".txt");
+		if(!randomLevel) {
+			//TODO Once we have levels being set globally, get the level here from the global variables. 
+			try {
 
-			triArray = new TriInfo[lines.Length - 1]; //first line of the level file is the queue for that level
-			queueTris = lines[0].Split(',');
-			for(int i=1; i< lines.Length; i++) {
-				int commaIndex = lines[i].IndexOf(',');
-				int colonIndex = lines[i].IndexOf(':');
-				int x = int.Parse(lines[i].Substring(0, commaIndex));
-				int y = int.Parse(lines[i].Substring(commaIndex + 1, colonIndex - 1 - commaIndex));
-				string colour = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
+				string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + 1  + ".txt");
 
-				TriInfo triInfo = new TriInfo(x, y, colour);
+				triArray = new TriInfo[lines.Length - 1]; //first line of the level file is the queue for that level
+				queueTris = lines[0].Split(',');
+				for(int i=1; i< lines.Length; i++) {
+					int commaIndex = lines[i].IndexOf(',');
+					int colonIndex = lines[i].IndexOf(':');
+					int x = int.Parse(lines[i].Substring(0, commaIndex));
+					int y = int.Parse(lines[i].Substring(commaIndex + 1, colonIndex - 1 - commaIndex));
+					string colour = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
 
-				triArray[i - 1] = triInfo; // first "i" was for the queue
+					TriInfo triInfo = new TriInfo(x, y, colour);
+
+					triArray[i - 1] = triInfo; // first "i" was for the queue
+				}
+			}
+			catch {
+				Debug.Log("error reading file level" + 1 + ".txt");
+			}
+		} 
+		else {
+
+			//Loads a random level into the Triangle array
+			int negRandY = (int) Random.Range(1,randomLength) * - 1;
+			int randY = (int) Random.Range(1,randomLength);
+			TriInfo [] temp = new TriInfo[(randomLength + Mathf.Abs(randomLength) + 1) * (randomLength + Mathf.Abs(randomLength) + 1) - 1];
+
+			int arrLoc = 0;
+			for(int i = negRandY; i <= randY; i++) {
+				int negRandX = (int) Random.Range(1,randomLength) * - 1;
+				int randX = (int) Random.Range(1,randomLength);
+
+				for(int j = negRandX; j <= randX; j++) {
+					if(i == 0 && j == 0) {
+						continue;
+					}
+
+					string rColour = randomColour();
+					TriInfo triInfo = new TriInfo(j, i, rColour);
+					temp[arrLoc] = triInfo;
+					arrLoc++;
+				}
+			}
+			triArray = new TriInfo[arrLoc];
+			System.Array.Copy(temp, 0, triArray, 0, arrLoc);
+
+			//loops over arbitrary number (just picked 20), to load the queue with that many random colours. 
+			queueTris = new string[40];
+			for(int i = 0; i < queueTris.Length; i++) {
+				queueTris[i] = randomColour();
 			}
 		}
-		catch {
-			Debug.Log("error reading file level" + 1 + ".txt");
+
+	}
+
+	/**
+	 * Gives a random colour that a triangle can have. If new colours are added, this function needs to be updated
+	 * to attribute for this. Current triangles can be: blue, aqua, green pink, red, yellow.
+	 */
+	public string randomColour() {
+		int thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor = (int) Random.Range (1, 6);
+		string returnColour = "b"; //default colour blue
+
+		if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 1) {
+			returnColour = "r";
 		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 2) {
+			returnColour = "g";
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 3) {
+			returnColour = "a";
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 4) {
+			returnColour = "p";
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 5) {
+			returnColour = "y";
+		} 
+
+		return returnColour;
 	}
 
 	/**
