@@ -13,12 +13,12 @@ public class GlobalFlags : MonoBehaviour {
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
-	public static bool isRandLevel = true;
+	public static bool isRandLevel = false;
 
 	/*
 	 * Called when the user selects they want to play random levels
 	 */
-	public void setRandLevel(bool rLevel) {
+	public static void setRandLevel(bool rLevel) {
 		isRandLevel = rLevel;
 	}
 
@@ -32,7 +32,7 @@ public class GlobalFlags : MonoBehaviour {
 	/**
 	 * Made so that when the level is beaten any script can call this and change it to the next level
 	 */
-	public void setLevel(int num) {
+	public static void setLevel(int num) {
 		level = num;
 	}
 
