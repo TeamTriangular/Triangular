@@ -24,6 +24,7 @@ public class ModeSelectScript : MonoBehaviour {
 		halfScreenW = (Screen.width/2) - 50;
 		halfScreenH = Screen.height/2 + 0;
 		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Random")){
+			GlobalFlags.setRandLevel (true);
 			Application.LoadLevel("game");
 		}
 

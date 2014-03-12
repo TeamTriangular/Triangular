@@ -20,6 +20,7 @@ public class LevelSelectPreScript : MonoBehaviour {
 			halfScreenW = (Screen.width/2) - 410 + (i*120);
 			halfScreenH = Screen.height/2 + 0;
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Level: "+(i+1))){
+				GlobalFlags.setLevel(i+1);
 				Application.LoadLevel("game");
 			}
 		}
