@@ -68,9 +68,15 @@ public class LevelParser : MonoBehaviour {
 		if(!randomLevel) {
 			//TODO Once we have levels being set globally, get the level here from the global variables. 
 			try {
+<<<<<<< HEAD
+				
+				string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + 1  + ".txt");
+				
+=======
 
 				string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + GlobalFlags.getLevel() + ".txt");
 
+>>>>>>> 2469e6f81695c40cdd157d57720871724dfa3f84
 				triArray = new TriInfo[lines.Length - 1]; //first line of the level file is the queue for that level
 				queueTris = lines[0].Split(',');
 				for(int i=1; i< lines.Length; i++) {
