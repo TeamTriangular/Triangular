@@ -92,20 +92,20 @@ public class LevelParser : MonoBehaviour {
 		else {
 			
 			//Loads a random level into the Triangle array
-			int negRandY = -4;//(int) Random.Range(1,RANDOM_LENGTH) * - 1;
-			int randY = 4;//(int) Random.Range(1,RANDOM_LENGTH);
+			int negRandY = (int) Random.Range(1,RANDOM_LENGTH) * - 1;
+			int randY = (int) Random.Range(1,RANDOM_LENGTH);
 			TriInfo [] temp = new TriInfo[(RANDOM_LENGTH + Mathf.Abs(RANDOM_LENGTH) + 1) * (RANDOM_LENGTH + Mathf.Abs(RANDOM_LENGTH) + 1) - 1];
 			
 			//used to help make sure there is no complete cluster in the random level
 			string [,] testComplete = new string[RANDOM_LENGTH * 2 + 1, RANDOM_LENGTH * 2 + 1];
 			
 			int arrLoc = 0;
-			int yLocTri = 0; //x location of the triangle in an array
+			int yLocTri = 0; //y location of the triangle in an array
 			for(int i = negRandY; i <= randY; i++) {
-				int negRandX = -4;//(int) Random.Range(1,RANDOM_LENGTH) * - 1;
-				int randX = 4;//(int) Random.Range(1,RANDOM_LENGTH);
+				int negRandX = (int) Random.Range(1,RANDOM_LENGTH) * - 1;
+				int randX = (int) Random.Range(1,RANDOM_LENGTH);
 				
-				int xLocTri = 0; //y location  of the triangle in an array
+				int xLocTri = negRandX + RANDOM_LENGTH; //x location  of the triangle in an array
 				for(int j = negRandX; j <= randX; j++) {
 					if(i == 0 && j == 0) {
 						testComplete[xLocTri,yLocTri] = "black";
@@ -128,7 +128,7 @@ public class LevelParser : MonoBehaviour {
 				}
 				yLocTri++;
 			}
-			
+			Debug.Log(hasCompleteTriangle(testComplete, true, 0, 0));
 			triArray = new TriInfo[arrLoc];
 			System.Array.Copy(temp, 0, triArray, 0, arrLoc);
 			
@@ -147,7 +147,7 @@ public class LevelParser : MonoBehaviour {
 	 * was formed. Ex, pointing up triangle will test against (-2, 0) and (-1, -1), pointing down will test against
 	 * (-1, -1) and (1, -1). The second way is by going through the entire list and returning true or false depending on 
 	 * if a cluster is formed. 
-	 * @param string [] testComp, the array of triangle of the level so far, which will be tested against. 
+	 * @param string [] testComp, the 2D array of triangle of the level so far, which will be tested against. 
 	 * @param bool wholeArray, flag for if you want to determine if the entire array has a complete set
 	 * @param int xLoc, x location of a triangle
 	 * @param int yLoc, y location of a triangle
@@ -158,7 +158,7 @@ public class LevelParser : MonoBehaviour {
 		if (wholeArray) {
 			for (int i = 1; i < testComp.GetLength(0); i++) {
 				for (int j = 1; j < testComp.GetLength(1); j++) {
-					bool isTriUp = isPointingUp(xLoc, yLoc);
+					bool isTriUp = isPointingUp(i, j);
 					if(i == 1 && isTriUp) {
 						continue;
 					}
@@ -171,14 +171,22 @@ public class LevelParser : MonoBehaviour {
 							string colour2 = testComp[i - 1, j - 1];
 							string colour3 = testComp[i, j];
 							
-							hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
+							if(string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
+							   		&& string.Compare(colour1, "") != -1) {
+								hasCluster = true;
+								break;
+							}
 						} 
 						else {
 							string colour1 = testComp[i - 1, j - 1];
 							string colour2 = testComp[i + 1, j - 1];
 							string colour3 = testComp[i, j];
 							
-							hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
+							if(hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
+							   		&& string.Compare(colour1, "") != -1) {
+								hasCluster = true;
+								break;
+							}
 						}
 					}
 				}
