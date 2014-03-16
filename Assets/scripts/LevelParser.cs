@@ -128,7 +128,6 @@ public class LevelParser : MonoBehaviour {
 				}
 				yLocTri++;
 			}
-			Debug.Log(hasCompleteTriangle(testComplete, true, 0, 0));
 			triArray = new TriInfo[arrLoc];
 			System.Array.Copy(temp, 0, triArray, 0, arrLoc);
 			
