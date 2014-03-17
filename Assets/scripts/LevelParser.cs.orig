@@ -68,9 +68,15 @@ public class LevelParser : MonoBehaviour {
 		if(!randomLevel) {
 			//TODO Once we have levels being set globally, get the level here from the global variables. 
 			try {
+<<<<<<< HEAD
+				
+				string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + 1  + ".txt");
+				
+=======
 
 				string[] lines = System.IO.File.ReadAllLines("assets/levels/level" + GlobalFlags.getLevel() + ".txt");
 
+>>>>>>> 2469e6f81695c40cdd157d57720871724dfa3f84
 				triArray = new TriInfo[lines.Length - 1]; //first line of the level file is the queue for that level
 				queueTris = lines[0].Split(',');
 				for(int i=1; i< lines.Length; i++) {
@@ -92,20 +98,20 @@ public class LevelParser : MonoBehaviour {
 		else {
 			
 			//Loads a random level into the Triangle array
-			int negRandY = (int) Random.Range(1,RANDOM_LENGTH) * - 1;
-			int randY = (int) Random.Range(1,RANDOM_LENGTH);
+			int negRandY = -4;//(int) Random.Range(1,RANDOM_LENGTH) * - 1;
+			int randY = 4;//(int) Random.Range(1,RANDOM_LENGTH);
 			TriInfo [] temp = new TriInfo[(RANDOM_LENGTH + Mathf.Abs(RANDOM_LENGTH) + 1) * (RANDOM_LENGTH + Mathf.Abs(RANDOM_LENGTH) + 1) - 1];
 			
 			//used to help make sure there is no complete cluster in the random level
 			string [,] testComplete = new string[RANDOM_LENGTH * 2 + 1, RANDOM_LENGTH * 2 + 1];
 			
 			int arrLoc = 0;
-			int yLocTri = 0; //y location of the triangle in an array
+			int yLocTri = 0; //x location of the triangle in an array
 			for(int i = negRandY; i <= randY; i++) {
-				int negRandX = (int) Random.Range(1,RANDOM_LENGTH) * - 1;
-				int randX = (int) Random.Range(1,RANDOM_LENGTH);
+				int negRandX = -4;//(int) Random.Range(1,RANDOM_LENGTH) * - 1;
+				int randX = 4;//(int) Random.Range(1,RANDOM_LENGTH);
 				
-				int xLocTri = negRandX + RANDOM_LENGTH; //x location  of the triangle in an array
+				int xLocTri = 0; //y location  of the triangle in an array
 				for(int j = negRandX; j <= randX; j++) {
 					if(i == 0 && j == 0) {
 						testComplete[xLocTri,yLocTri] = "black";
@@ -128,6 +134,7 @@ public class LevelParser : MonoBehaviour {
 				}
 				yLocTri++;
 			}
+			
 			triArray = new TriInfo[arrLoc];
 			System.Array.Copy(temp, 0, triArray, 0, arrLoc);
 			
@@ -146,7 +153,7 @@ public class LevelParser : MonoBehaviour {
 	 * was formed. Ex, pointing up triangle will test against (-2, 0) and (-1, -1), pointing down will test against
 	 * (-1, -1) and (1, -1). The second way is by going through the entire list and returning true or false depending on 
 	 * if a cluster is formed. 
-	 * @param string [] testComp, the 2D array of triangle of the level so far, which will be tested against. 
+	 * @param string [] testComp, the array of triangle of the level so far, which will be tested against. 
 	 * @param bool wholeArray, flag for if you want to determine if the entire array has a complete set
 	 * @param int xLoc, x location of a triangle
 	 * @param int yLoc, y location of a triangle
@@ -157,7 +164,7 @@ public class LevelParser : MonoBehaviour {
 		if (wholeArray) {
 			for (int i = 1; i < testComp.GetLength(0); i++) {
 				for (int j = 1; j < testComp.GetLength(1); j++) {
-					bool isTriUp = isPointingUp(i, j);
+					bool isTriUp = isPointingUp(xLoc, yLoc);
 					if(i == 1 && isTriUp) {
 						continue;
 					}
@@ -170,22 +177,14 @@ public class LevelParser : MonoBehaviour {
 							string colour2 = testComp[i - 1, j - 1];
 							string colour3 = testComp[i, j];
 							
-							if(string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
-							   		&& string.Compare(colour1, "") != -1) {
-								hasCluster = true;
-								break;
-							}
+							hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
 						} 
 						else {
 							string colour1 = testComp[i - 1, j - 1];
 							string colour2 = testComp[i + 1, j - 1];
 							string colour3 = testComp[i, j];
 							
-							if(hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
-							   		&& string.Compare(colour1, "") != -1) {
-								hasCluster = true;
-								break;
-							}
+							hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
 						}
 					}
 				}
