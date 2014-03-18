@@ -13,7 +13,7 @@ public class GlobalFlags : MonoBehaviour {
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
-	public static bool isRandLevel = true;
+	public static bool isRandLevel = false;
 
 	/*
 	 * Called when the user selects they want to play random levels
