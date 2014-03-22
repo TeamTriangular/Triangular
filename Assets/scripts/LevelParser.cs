@@ -85,8 +85,9 @@ public class LevelParser : MonoBehaviour {
 					triArray[i - 1] = triInfo; // first "i" was for the queue
 				}
 			}
-			catch {
-				Debug.Log("error reading file level" + 1 + ".txt");
+			catch (UnityException e){
+				Debug.Log("error reading file level" + GlobalFlags.getLevel() + ".txt");
+				Debug.Log(e.StackTrace);
 			}
 		} 
 		else {
