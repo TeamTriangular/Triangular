@@ -96,6 +96,47 @@ public class TriangleGrid : MonoBehaviour {
 		}
 	}
 	
+	public bool isStatic(GameObject o)
+	{
+		for(int i=0; i<gridSize; i++)
+		{
+			for(int j=0; j<gridSize; j++)
+			{
+				if(grid[i, j] != null && grid[i, j].triangleObject == o)
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	//return points that should not be used to attract to(i.e triangles that re no connected to the grid)
+	public System.Collections.Generic.List<Transform> getIgnorePoints()
+	{
+		GameObject[] objs = GameObject.FindGameObjectsWithTag("Triangle");
+		
+		System.Collections.Generic.List<Transform> ignore = new System.Collections.Generic.List<Transform>();
+		
+		foreach( GameObject n in objs)
+		{	
+			if(n != null)
+			{
+				//if not attatched to the center, add to ignore vector
+				if(!isStatic(n))
+				{
+					for(int k=0; k < n.transform.childCount; k++)
+					{
+						ignore.Add(n.transform.GetChild(k));
+					}
+				}
+			}
+		}
+		
+		return ignore;
+	}
+	
 	public void showGrid()
 	{
 		for(int i = -gridSize/2 + 1;i < gridSize/2; i++)
@@ -183,10 +224,9 @@ public class TriangleGrid : MonoBehaviour {
 		{
 			possibleoffsets[2] = new Vector2(0, -1);
 		}
-
+		
 		for(int i=0; i< possibleoffsets.Length; i++)
 		{
-			
 			if(getNode(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y) == null &&(
 			   minDist > Vector3.Distance(newTriangle.transform.position, getBasePosition(oldNode.x + (int)possibleoffsets[i].x, oldNode.y + (int)possibleoffsets[i].y)) 
 				|| (x == int.MaxValue || y == int.MaxValue)))
@@ -312,8 +352,6 @@ public class TriangleGrid : MonoBehaviour {
 			}
 			c = (n.triangleObject.GetComponent<TriangleColour>().GetColour());
 		}
-
-
 		
 		//check left node
 		n = getNode(center.x - 1, center.y);
@@ -482,13 +520,13 @@ public class TriangleGrid : MonoBehaviour {
 			grid[(int)realCords.x, (int)realCords.y] = null;
 		}
 		//Remove any triangles stranded by this action
-		RemoveStranded();
+		attatchStranded();
 	}
 
 	/// <summary>
 	/// Checks for any nodes not connected to the center and removes them
 	/// </summary>
-	private void RemoveStranded()
+	private void attatchStranded()
 	{
 		//if the center was temporarily removed, return it to the grid
 		if( tempStoreCenter != null)
@@ -497,18 +535,57 @@ public class TriangleGrid : MonoBehaviour {
 			grid[(int)centerCoord.x, (int)centerCoord.y] = tempStoreCenter;
 			tempStoreCenter = null;
 		}
-
+		
+		//join stranded triangles so they can float back to the center
 		triangleNode center = getNode(0, 0);
+		System.Collections.Generic.List<triangleNode> strandedTriangles = new System.Collections.Generic.List<triangleNode>();
 		foreach( triangleNode n in grid)
-		{
+		{	
 			if(n != null)
 			{
 				if(!AStar(n,center))
 				{
-					Destroy (n.triangleObject);
-					Vector2 realCords = getRealCoords(n.x , n.y);
-					grid[(int)realCords.x, (int)realCords.y] = null;
+					connectToNeighbours(n);
+					strandedTriangles.Add(n);
 				}
+			}
+		}
+		
+		foreach( triangleNode n in strandedTriangles)
+		{
+			if(n.triangleObject.GetComponent<attraction>() == null)
+			{
+				n.triangleObject.AddComponent<attraction>();
+			}
+			
+			deleteNode(n.x, n.y);
+
+			n.triangleObject.rigidbody.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
+		}
+		
+		foreach( triangleNode n in strandedTriangles)
+		{
+			n.triangleObject.GetComponent<attraction>().enabled = true;
+			n.triangleObject.GetComponent<attraction>().updateIgnorePoints();
+		}
+	}
+	
+	void connectToNeighbours(triangleNode n)
+	{
+		Vector2[] possibleoffsets = {new Vector2(-1,0), new Vector2(1,0), new Vector2(0,1)};
+
+		if(isPointingUp(n))
+		{
+			possibleoffsets[2] = new Vector2(0, -1);
+		}
+		
+		for(int i=0; i < possibleoffsets.Length; i++)
+		{
+			if(getNode((int)(n.x + possibleoffsets[i].x), (int)(n.y + possibleoffsets[i].y)) != null)
+			{
+				triangleNode t = getNode((int)(n.x + possibleoffsets[i].x), (int)(n.y + possibleoffsets[i].y));
+				FixedJoint f = n.triangleObject.AddComponent<FixedJoint>();
+				f.connectedBody = t.triangleObject.GetComponent<Rigidbody>();
 			}
 		}
 	}
@@ -612,6 +689,13 @@ public class TriangleGrid : MonoBehaviour {
 		Vector2 coords = getRealCoords(x, y);
 
 		grid[(int)coords.x ,(int)coords.y] = new triangleNode(obj, x, y);
+	}
+	
+	private void deleteNode(int x, int y)
+	{
+		Vector2 coords = getRealCoords(x, y);
+
+		grid[(int)coords.x ,(int)coords.y] = null;
 	}
 
 	private void setNode(Vector2 coords , GameObject obj)

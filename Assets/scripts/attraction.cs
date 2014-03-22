@@ -58,48 +58,10 @@ public class attraction : MonoBehaviour {
 		updateIgnorePoints();
 	}
 	
-	void updateIgnorePoints()
+	public void updateIgnorePoints()
 	{
 		ignoredPoints.Clear();
-		
-		FixedJoint[] neighbours = GetComponents<FixedJoint>();
-		System.Collections.Generic.List<Rigidbody> visitedNodes = new System.Collections.Generic.List<Rigidbody>();
-		visitedNodes.Add (rigidbody); // add ourself so we dont visit ourself
-		
-		addNeighbours(neighbours, visitedNodes);
-	}
-	
-	void addNeighbours(FixedJoint[] neighbours, System.Collections.Generic.List<Rigidbody> visitedNodes)
-	{
-		
-		
-		//look through all neighbours we are connected to 
-		for(int i=0; i< neighbours.Length; i++)
-		{
-			bool alreadyExists = false;
-			//check if we have already visited the triangle
-			for(int k=0; k< visitedNodes.Count; k++)
-			{
-				if(visitedNodes[k] == neighbours[i].connectedBody )
-				{
-					alreadyExists = true;
-					break;
-				}
-			}
-			
-			//if we have not visited the triange then add the control points for the triangle to the ignore list
-			if(!alreadyExists)
-			{
-				visitedNodes.Add(neighbours[i].connectedBody);
-				for(int k=0; k < neighbours[i].connectedBody.transform.childCount; k++)
-				{
-					ignoredPoints.Add(neighbours[i].connectedBody.transform.GetChild(k));
-				}
-				
-				//call recursivly for his neighbours
-				addNeighbours(neighbours[i].gameObject.GetComponents<FixedJoint>(), visitedNodes);
-			}
-		}
+		ignoredPoints = gridScript.getIgnorePoints();
 	}
 	
 	// Update is called once per frame
@@ -128,10 +90,15 @@ public class attraction : MonoBehaviour {
 			
 			for(int i=0; i<hinges.Length; i++)
 			{
+				//destroy our hinge to neighbour triangle
 				Rigidbody r = hinges[i].connectedBody;
 				DestroyImmediate(hinges[i]);
 				
-				r.GetComponent<attraction>().formConnectionChain(transform);
+				//destroy their hinge to use
+				if(!gridScript.isStatic(r.gameObject))
+				{	
+					r.GetComponent<attraction>().formConnectionChain(transform);
+				}
 			}
 		}
 		
