@@ -7,8 +7,8 @@ public class attraction : MonoBehaviour {
 	public float pullFactor = 1.0f; // strength of pull
 	public float connectionDist = 0.1f;
 
+	System.Collections.Generic.List<Transform> attractionPoints;
 	System.Collections.Generic.List<Transform> centerPoints;
-	System.Collections.Generic.List<Transform> ignoredPoints;
 	Vector3[] faceNormals = new Vector3[3];
 
 	public TriangleGrid gridScript;
@@ -38,8 +38,10 @@ public class attraction : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+		attractionPoints = new System.Collections.Generic.List<Transform>();
+
+		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
 		centerPoints = new System.Collections.Generic.List<Transform>();
-		ignoredPoints = new System.Collections.Generic.List<Transform>();
 		
 		for(int i=0; i< transform.childCount; i++)
 		{
@@ -49,19 +51,17 @@ public class attraction : MonoBehaviour {
 			}
 		}
 
-		gridScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<TriangleGrid>();
-
 		faceNormals[0] = Quaternion.Euler( new Vector3(0, 0, 60)) * transform.up;
 		faceNormals[1] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[0];
 		faceNormals[2] = Quaternion.Euler( new Vector3(0, 0, 120)) * faceNormals[1];
 
-		updateIgnorePoints();
+		updateAttractionPoints();
 	}
 	
-	public void updateIgnorePoints()
+	public void updateAttractionPoints()
 	{
-		ignoredPoints.Clear();
-		ignoredPoints = gridScript.getIgnorePoints();
+		attractionPoints.Clear();
+		attractionPoints = gridScript.getAttractionPoints(gameObject);
 	}
 	
 	// Update is called once per frame
@@ -84,7 +84,6 @@ public class attraction : MonoBehaviour {
 			rigidbody.constraints = RigidbodyConstraints.FreezeAll;
 			gridScript.connectTriangle(collisionObj.gameObject, gameObject);
 			enabled = false;
-			GlobalFlags.canFire = true;
 			
 			FixedJoint[] hinges = GetComponents<FixedJoint>();
 			
@@ -157,7 +156,6 @@ public class attraction : MonoBehaviour {
 	void applyForces()
 	{
 		System.Collections.Generic.List<PullForce> centerForces = new System.Collections.Generic.List<PullForce>();
-		System.Collections.Generic.List<PullForce> lowestCenterForces = new System.Collections.Generic.List<PullForce>();
 
 		for(int i=0; i< centerPoints.Count; i++)
 		{
@@ -165,18 +163,18 @@ public class attraction : MonoBehaviour {
 		}
 		
 		//sort to find strongest forces
-		lowestCenterForces = sortForces(centerForces);
+		centerForces = sortForces(centerForces);
 
 		float forceMult = 1f;
 		Vector3 finalForce = Vector3.zero;
 		
 		//if we are close to a attraction point, attract to it. otherwise attract toward 0,0,0
-		if(lowestCenterForces.Count > 0)
+		if(centerForces.Count > 0)
 		{
-			finalForce = lowestCenterForces[0].force;			
-			if(lowestCenterForces[0].dist > 0)
+			finalForce = centerForces[0].force;			
+			if(centerForces[0].dist > 0)
 			{
-				forceMult = pullFactor/(Mathf.Pow(lowestCenterForces[0].dist, 2));
+				forceMult = pullFactor/(Mathf.Pow(centerForces[0].dist, 2));
 			}
 			
 		}
@@ -193,10 +191,10 @@ public class attraction : MonoBehaviour {
 		Vector3 targetLookPoint = Vector3.zero;			
 		float rot;
 		
-		if(lowestCenterForces.Count > 0)
+		if(centerForces.Count > 0)
 		{
-			rot = Vector3.Angle((transform.rotation * faceNormals[0]).normalized, (lowestCenterForces[0].dstObj.position - transform.position).normalized);
-			rot = findSmallestRotation(lowestCenterForces[0].dstObj.position, transform.position, rot);
+			rot = Vector3.Angle((transform.rotation * faceNormals[0]).normalized, (centerForces[0].dstObj.position - transform.position).normalized);
+			rot = findSmallestRotation(centerForces[0].dstObj.position, transform.position, rot);
 		}
 		else
 		{
@@ -228,11 +226,11 @@ public class attraction : MonoBehaviour {
 		}
 		
 		//if we are close enough to triangle, lock to it
-		if(lowestCenterForces.Count > 0)
+		if(centerForces.Count > 0)
 		{
-			if(Vector3.Distance(lowestCenterForces[0].dstObj.position, lowestCenterForces[0].applyObj.position) < connectionDist)
+			if(Vector3.Distance(centerForces[0].dstObj.position, centerForces[0].applyObj.position) < connectionDist)
 			{
-				formConnection(lowestCenterForces[0].dstObj.parent);
+				formConnection(centerForces[0].dstObj.parent);
 			}
 		}
 	}
@@ -244,28 +242,21 @@ public class attraction : MonoBehaviour {
 	 * @param bool is to say it it's a corner point or not. 
 	 */
 	PullForce getForceForPoint(Transform o, bool cornerPoint)
-	{
-		GameObject[] points;
-		if(cornerPoint)
-		{
-			points = GameObject.FindGameObjectsWithTag("CornerControlPoint");
-		}
-		else
-		{
-			points = GameObject.FindGameObjectsWithTag("MiddleControlPoint");
-		}
-		 
+	{		 
 		
 		Transform closestPoint = o;
 		double dist = -1;
 		
-		for(int i=0; i< points.Length; i++)
+		for(int i=0; i< attractionPoints.Count; i++)
 		{
-			double newDist = Vector3.Distance(o.position, points[i].transform.position) + 0.001f;
-			if(!shouldIgnore(points[i]) && ((dist == -1) || (newDist< dist)))
+			if(attractionPoints[i] != null)
 			{
-				closestPoint = points[i].transform;
-				dist = newDist;
+				double newDist = Vector3.Distance(o.position, attractionPoints[i].transform.position) + 0.001f;
+				if((dist == -1) || (newDist< dist))
+				{
+					closestPoint = attractionPoints[i].transform;
+					dist = newDist;
+				}
 			}
 		}
 		
@@ -278,28 +269,6 @@ public class attraction : MonoBehaviour {
 		
 		// return max force so it is never chosen as the lowest force. this is the equivlant to null
 		return new PullForce(transform, transform, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue )); 
-	}
-
-	/**
-	 * Used to determine if this point is a child of the triangle we're currently in
-	 * @param Gameobject the point which we compare. 
-	 */
-	bool shouldIgnore(GameObject o)
-	{
-		if(o.transform.IsChildOf(transform))
-		{
-			return true;
-		}
-		
-		for(int i=0; i<ignoredPoints.Count; i++)
-		{
-			if(ignoredPoints[i] == o.transform)
-			{
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	// use selection sort to return a sort list of the pull forces
