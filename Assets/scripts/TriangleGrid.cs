@@ -18,6 +18,9 @@ public class TriangleGrid : MonoBehaviour {
 	//This is used because we temporarily need to remove the center from the grid
 	//when cascading to avoid infinit recursion
 	private triangleNode tempStoreCenter;
+	
+	//delay updating attraction points until next update tick
+	bool updateControlPoints = false;
 
 	private class triangleNode
 	{
@@ -94,6 +97,61 @@ public class TriangleGrid : MonoBehaviour {
 				}
 			}
 		}
+		
+		if(updateControlPoints)			
+		{
+			updateAllAttractionPoints();
+			updateControlPoints = false;
+			
+			//if all triangles are atatched to grid, let the player fire again
+			if(allTrianglesStatic())
+			{
+				GlobalFlags.canFire = true;
+			}		
+		}
+	}
+	
+	public bool isAttracting(GameObject o)
+	{
+		if(!isStatic(o))
+		{
+			return false;
+		}
+		
+		// and not surrounded
+		bool innerTriangle = true;
+		triangleNode thisNode = getNode(o);
+		Vector2[] possibleoffsets = {new Vector2(-1,0), new Vector2(1,0), new Vector2(0,1)};
+		if(isPointingUp(thisNode))
+		{
+			possibleoffsets[2] = new Vector2(0, -1);
+		}
+		
+		for(int k=0; k< possibleoffsets.Length; k++)
+		{
+			if(getNode((int)possibleoffsets[k].x + thisNode.x, (int)possibleoffsets[k].y + thisNode.y) == null)
+			{
+				innerTriangle = false;
+			}
+		}
+		
+		return !innerTriangle;
+	}
+	
+	public bool allTrianglesStatic()
+	{
+		GameObject[] objs = GameObject.FindGameObjectsWithTag("Triangle");
+		
+		foreach( GameObject n in objs)
+		{	
+			//dont add ourselves
+			if(!isStatic(n))
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public bool isStatic(GameObject o)
@@ -113,28 +171,44 @@ public class TriangleGrid : MonoBehaviour {
 	}
 	
 	//return points that should not be used to attract to(i.e triangles that re no connected to the grid)
-	public System.Collections.Generic.List<Transform> getIgnorePoints()
+	public System.Collections.Generic.List<Transform> getAttractionPoints(GameObject o)
 	{
 		GameObject[] objs = GameObject.FindGameObjectsWithTag("Triangle");
 		
-		System.Collections.Generic.List<Transform> ignore = new System.Collections.Generic.List<Transform>();
+		System.Collections.Generic.List<Transform> attraction = new System.Collections.Generic.List<Transform>();
 		
 		foreach( GameObject n in objs)
 		{	
-			if(n != null)
+			//dont add ourselves
+			if(n != o)
 			{
 				//if not attatched to the center, add to ignore vector
-				if(!isStatic(n))
+				if(isAttracting(n))
 				{
 					for(int k=0; k < n.transform.childCount; k++)
 					{
-						ignore.Add(n.transform.GetChild(k));
+						attraction.Add(n.transform.GetChild(k));
 					}
 				}
 			}
 		}
 		
-		return ignore;
+		return attraction;
+	}
+	
+	//updates all triangles of attraction points
+	void updateAllAttractionPoints()
+	{
+		GameObject[] objs = GameObject.FindGameObjectsWithTag("Triangle");
+		
+		foreach( GameObject n in objs)
+		{	
+			//dont add ourselves
+			if(!isStatic(n))
+			{
+				n.GetComponent<attraction>().updateAttractionPoints();
+			}
+		}
 	}
 	
 	public void showGrid()
@@ -272,6 +346,8 @@ public class TriangleGrid : MonoBehaviour {
 		setCorrectPosition(getNode((int)gridPos.x, (int)gridPos.y));
 		//checking for a Greater Triangle
 		CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y));
+		
+		updateControlPoints = true;
 	}
 
 	/// <summary>
@@ -521,6 +597,8 @@ public class TriangleGrid : MonoBehaviour {
 		}
 		//Remove any triangles stranded by this action
 		attatchStranded();
+		
+		updateControlPoints = true;
 	}
 
 	/// <summary>
@@ -545,7 +623,7 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(!AStar(n,center))
 				{
-					connectToNeighbours(n);
+					//connectToNeighbours(n);
 					strandedTriangles.Add(n);
 				}
 			}
@@ -564,9 +642,12 @@ public class TriangleGrid : MonoBehaviour {
 		}
 		
 		foreach( triangleNode n in strandedTriangles)
-		{
-			n.triangleObject.GetComponent<attraction>().enabled = true;
-			n.triangleObject.GetComponent<attraction>().updateIgnorePoints();
+		{			
+			n.triangleObject.GetComponent<attraction>().updateAttractionPoints();
+			if(n.triangleObject.GetComponents<FixedJoint>().Length < 3)
+			{
+				n.triangleObject.GetComponent<attraction>().enabled = true;
+			}
 		}
 	}
 	
