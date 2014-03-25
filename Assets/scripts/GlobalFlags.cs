@@ -10,6 +10,8 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static int level = 1; 
 
+	public static int score = 0;
+
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
@@ -41,5 +43,13 @@ public class GlobalFlags : MonoBehaviour {
 	 */
 	public static int getLevel() {
 		return level;
+	}
+
+	public static void setScore(int newscore){
+		score = newscore; 
+	}
+
+	public static int getScore(){
+		return score;
 	}
 }
