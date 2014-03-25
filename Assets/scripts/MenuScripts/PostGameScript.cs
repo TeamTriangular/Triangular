@@ -8,8 +8,8 @@ public class PostGameScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		score.text = "Score: " + 150000;
-		title.text = "Level: " + 1;
+		score.text = "Score: " + GlobalFlags.getScore();
+		title.text = "Level: " + GlobalFlags.getLevel();
 	}
 	
 	void OnGUI () {
