@@ -124,6 +124,9 @@ public class TriangleGrid : MonoBehaviour {
 
 		if(!inEditMode)
 		{
+			GameObject[] queueTriangles = GameObject.FindGameObjectsWithTag("QueueTriangle");
+			GlobalFlags.setQueueBonusTotal(queueTriangles.Length * GlobalFlags.getQueueBounus());
+
 			//decrement delay time
 			if(((elapsedChainDelay > 0 && elapsedChainDelay != float.MaxValue)) && (chainedClusters.Count == 0 || (chainedClusters.Count > 0 && !chainedClusters.Peek().skipDelay)))
 			{
@@ -168,9 +171,9 @@ public class TriangleGrid : MonoBehaviour {
 			else
 			{
 				GameObject[] triangles = GameObject.FindGameObjectsWithTag("Triangle");
-				GameObject[] queueTriangles = GameObject.FindGameObjectsWithTag("QueueTriangle");
-				if(triangles.Length == 1 && queueTriangles.Length == 0)
+				if(triangles.Length == 1)
 				{
+					GlobalFlags.setScore(GlobalFlags.getScore() + GlobalFlags.getQueueBounusTotal());
 					Application.LoadLevel("PostGameMenu");
 				}
 			}
