@@ -21,17 +21,27 @@ public class TriangleGrid : MonoBehaviour {
 	
 	//delay updating attraction points until next update tick
 	bool updateControlPoints = false;
+	
+	//used for cascading
+	private System.Collections.Generic.Stack<triangleNode> chainedClusters = new System.Collections.Generic.Stack<triangleNode>();
+	private float elapsedChainDelay = float.MaxValue;
+	public float chainDelayTime = 2.0f;
+	
 
 	private class triangleNode
 	{
 		public GameObject triangleObject;
 		public int x, y;
+		public bool delayedDestroy;
+		public bool skipDelay;
 
 		public triangleNode(GameObject obj, int x_, int y_)
 		{
 			triangleObject = obj;
 			x = x_;
 			y = y_;
+			delayedDestroy = false;
+			skipDelay = false;
 		}
 	};
 
@@ -107,8 +117,56 @@ public class TriangleGrid : MonoBehaviour {
 			if(allTrianglesStatic())
 			{
 				GlobalFlags.canFire = true;
-			}		
+			}
 		}
+		
+		//decrement delay time
+		if(((elapsedChainDelay > 0 && elapsedChainDelay != float.MaxValue)) && (chainedClusters.Count == 0 || (chainedClusters.Count > 0 && !chainedClusters.Peek().skipDelay)))
+		{
+			elapsedChainDelay -= Time.deltaTime;
+		}
+		else if (elapsedChainDelay != float.MaxValue)
+		{
+			elapsedChainDelay = float.MaxValue;
+			
+			//if clusters left to deal with, color them and chain more
+			if(chainedClusters.Count > 0)
+			{
+				CheckForGreaterTriangle(chainedClusters.Pop());
+				startChainDelay();
+				
+			}
+			else if(chainedClusters.Count == 0)
+			{
+		
+					foreach (triangleNode n in grid)
+					{
+						if(n != null && n.delayedDestroy && n.triangleObject.GetComponent<TriangleColour>().GetColour() != Color.black)
+						{
+							Destroy(n.triangleObject);
+							deleteNode(n.x, n.y);
+						}
+						else if(n != null) // if it is black, set to not deleted
+						{
+							n.delayedDestroy = false;
+						}
+					}
+					
+					//Remove any triangles stranded by this action
+					dettatchStranded();
+					
+					updateControlPoints = true;
+				
+			}
+			
+			
+		}
+		
+	}
+	
+	private void startChainDelay()
+	{
+		elapsedChainDelay = chainDelayTime;
 	}
 	
 	public bool isAttracting(GameObject o)
@@ -344,27 +402,18 @@ public class TriangleGrid : MonoBehaviour {
 		setNode((int)gridPos.x, (int)gridPos.y, newTriangle);
 		setCorrectPosition(getNode((int)gridPos.x, (int)gridPos.y));
 		//checking for a Greater Triangle
-		CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y));
-		
-		updateControlPoints = true;
-		
-		//Remove any triangles stranded by this action
-		dettatchStranded();
-		
-		//if the center was temporarily removed, return it to the grid
-		if( tempStoreCenter != null)
+		if(!CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y)))
 		{
-			Vector2 centerCoord = getRealCoords(0,0);
-			grid[(int)centerCoord.x, (int)centerCoord.y] = tempStoreCenter;
-			tempStoreCenter = null;
+			updateControlPoints = true;
 		}
+		
 	}
 
 	/// <summary>
 	/// Checks for greater triangle.
 	/// </summary>
 	/// <param name="justAdded">Triangle that was just added</param>
-	private void CheckForGreaterTriangle(triangleNode justAdded)
+	private bool CheckForGreaterTriangle(triangleNode justAdded)
 	{
 		triangleNode n;
 
@@ -372,39 +421,99 @@ public class TriangleGrid : MonoBehaviour {
 		{
 			//check upper node
 			n = getNode(justAdded.x, justAdded.y - 1);
-			if(n !=null && CompareTriangleColours(n))
+			if(n !=null && CompareTriangleColours(n) && !n.delayedDestroy)
 			{
 				SetGreaterTriangleColours(n);
-				return;
+				return true;
 			}
 		}
 		else
 		{
 			//check lower node
 			n = getNode(justAdded.x, justAdded.y + 1);
-			if(n !=null && CompareTriangleColours(n))
+			if(n !=null && CompareTriangleColours(n) && !n.delayedDestroy)
 			{
 				SetGreaterTriangleColours(n);
-				return;
+				return true;
 			}
 		}
 		
 		
 		//check left node
 		n = getNode(justAdded.x - 1, justAdded.y);
-		if(n !=null && CompareTriangleColours(n))
+		if(n !=null && CompareTriangleColours(n) && !n.delayedDestroy)
 		{
 			SetGreaterTriangleColours(n);
-			return;
+			return true;
 		}
 		
 		//check right node
 		n = getNode(justAdded.x + 1, justAdded.y);
-		if(n !=null && CompareTriangleColours(n))
+		if(n !=null && CompareTriangleColours(n) && !n.delayedDestroy)
 		{
 			SetGreaterTriangleColours(n);
-			return;
+			return true;
 		}
+		
+		return false;
+	}
+	
+	//input is a triangle on the outsde of a cluster. if a cluster exists, return the node that is the center of that cluster. else null
+	private triangleNode getCenterOfNewCluster(triangleNode center)
+	{
+		triangleNode n;
+		if(isPointingUp(center))
+		{
+			//check upper node
+			n = getNode(center.x, center.y - 1);
+			if(n != null && CompareTriangleColours(n) && !n.delayedDestroy)
+			{
+				return n;
+			}
+		}
+		else
+		{
+			n = getNode(center.x, center.y + 1);
+			if(n != null && CompareTriangleColours(n) && !n.delayedDestroy)
+			{
+				return n;
+			}
+		}
+		
+		n = getNode(center.x + 1, center.y);
+		if(n != null && CompareTriangleColours(n) && !n.delayedDestroy )
+		{
+			return n;
+		}
+		
+		n = getNode(center.x - 1, center.y);
+		if(n != null && CompareTriangleColours(n) && !n.delayedDestroy)
+		{
+			return n;
+		}
+		
+		return null;
+	}
+	
+	private bool skipNewCluster(triangleNode center)
+	{
+		Vector2[] possibleoffsets = {new Vector2(-1,0), new Vector2(1,0), new Vector2(0,1)};
+		if(isPointingUp(center))
+		{
+			possibleoffsets[2] = new Vector2(0, -1);
+		}
+		
+		for(int k=0; k< possibleoffsets.Length; k++)
+		{
+			triangleNode neighbour = getNode((int)possibleoffsets[k].x + center.x, (int)possibleoffsets[k].y + center.y);
+			if(neighbour != null &&
+				center.triangleObject.GetComponent<TriangleColour>().GetColour() != neighbour.triangleObject.GetComponent<TriangleColour>().GetColour())
+			{
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	/// <summary>
@@ -486,6 +595,8 @@ public class TriangleGrid : MonoBehaviour {
 	/// <param name="center">The Center Triangle</param>
 	private void SetGreaterTriangleColours(triangleNode center)
 	{
+		center.delayedDestroy = true;
+		
 		Color c = center.triangleObject.GetComponent<TriangleColour>().GetColour();
 		triangleNode n;
 		
@@ -546,20 +657,8 @@ public class TriangleGrid : MonoBehaviour {
 		Vector2 realCords = getRealCoords(x , y);
 		triangleNode n;
 
-		if(center.triangleObject.GetComponent<TriangleColour>().GetColour() 
-		   != Color.black)
-		{
-			Destroy (center.triangleObject);
-			grid[(int)realCords.x, (int)realCords.y] = null;
-		}
-		else
-		{
-			//temporarily remove the center from the grid
-			tempStoreCenter = grid[(int)realCords.x, (int)realCords.y];
-			grid[(int)realCords.x, (int)realCords.y] = null;
-
-		}
-		
+		//destroy the center
+		center.delayedDestroy = true;	
 
 		if(isUpwards)
 		{
@@ -568,10 +667,16 @@ public class TriangleGrid : MonoBehaviour {
 			   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 			   != Color.black)
 			{
-				CheckForGreaterTriangle(n);
-				Destroy (n.triangleObject);
-				realCords = getRealCoords(n.x , n.y);
-				grid[(int)realCords.x, (int)realCords.y] = null;
+				n.delayedDestroy = true;
+				triangleNode newCenter = getCenterOfNewCluster(n);
+				if(newCenter != null)
+				{
+					if(skipNewCluster(newCenter))
+					{
+						n.skipDelay = true;
+					}
+					chainedClusters.Push(n);
+				}
 			}
 		}
 		else
@@ -581,10 +686,16 @@ public class TriangleGrid : MonoBehaviour {
 			   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 			   != Color.black)
 			{
-				CheckForGreaterTriangle(n);
-				Destroy (n.triangleObject);
-				realCords = getRealCoords(n.x , n.y);
-				grid[(int)realCords.x, (int)realCords.y] = null;
+				n.delayedDestroy = true;
+				triangleNode newCenter = getCenterOfNewCluster(n);
+				if(newCenter != null)
+				{
+					if(skipNewCluster(newCenter))
+					{
+						n.skipDelay = true;
+					}
+					chainedClusters.Push(n);
+				}
 			}
 		}
 
@@ -596,10 +707,16 @@ public class TriangleGrid : MonoBehaviour {
 		   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 		   != Color.black)
 		{
-			CheckForGreaterTriangle(n);
-			Destroy (n.triangleObject);
-			realCords = getRealCoords(n.x , n.y);
-			grid[(int)realCords.x, (int)realCords.y] = null;
+			n.delayedDestroy = true;
+			triangleNode newCenter = getCenterOfNewCluster(n);
+			if(newCenter != null)
+			{
+				if(skipNewCluster(newCenter))
+				{
+					n.skipDelay = true;
+				}
+				chainedClusters.Push(n);
+			}
 		}
 
 		// Right Node
@@ -609,13 +726,20 @@ public class TriangleGrid : MonoBehaviour {
 		   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 		   != Color.black)
 		{
-			CheckForGreaterTriangle(n);
-			Destroy (n.triangleObject);
-			realCords = getRealCoords(n.x , n.y);
-			grid[(int)realCords.x, (int)realCords.y] = null;
+			n.delayedDestroy = true;
+			triangleNode newCenter = getCenterOfNewCluster(n);
+			if(newCenter != null)
+			{
+				if(skipNewCluster(newCenter))
+				{
+					n.skipDelay = true;
+				}
+				chainedClusters.Push(n);
+			}
 		}
 		
-		updateControlPoints = true;
+
+		startChainDelay();
 	}
 
 	/// <summary>
