@@ -203,7 +203,6 @@ public class TriangleGrid : MonoBehaviour {
 		
 		foreach( GameObject n in objs)
 		{	
-			//dont add ourselves
 			if(!isStatic(n))
 			{
 				n.GetComponent<attraction>().updateAttractionPoints();
@@ -348,6 +347,17 @@ public class TriangleGrid : MonoBehaviour {
 		CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y));
 		
 		updateControlPoints = true;
+		
+		//Remove any triangles stranded by this action
+		dettatchStranded();
+		
+		//if the center was temporarily removed, return it to the grid
+		if( tempStoreCenter != null)
+		{
+			Vector2 centerCoord = getRealCoords(0,0);
+			grid[(int)centerCoord.x, (int)centerCoord.y] = tempStoreCenter;
+			tempStoreCenter = null;
+		}
 	}
 
 	/// <summary>
@@ -378,6 +388,7 @@ public class TriangleGrid : MonoBehaviour {
 				return;
 			}
 		}
+		
 		
 		//check left node
 		n = getNode(justAdded.x - 1, justAdded.y);
@@ -477,7 +488,7 @@ public class TriangleGrid : MonoBehaviour {
 	{
 		Color c = center.triangleObject.GetComponent<TriangleColour>().GetColour();
 		triangleNode n;
-
+		
 		if( c != Color.black)
 		{
 			if(isPointingUp(center))
@@ -521,7 +532,10 @@ public class TriangleGrid : MonoBehaviour {
 				n.triangleObject.GetComponent<TriangleColour>().SetColour(c);
 			}
 		}
+		
 		CascadeAndClear(center);
+
+
 	}
 
 	private void CascadeAndClear(triangleNode center)
@@ -543,7 +557,9 @@ public class TriangleGrid : MonoBehaviour {
 			//temporarily remove the center from the grid
 			tempStoreCenter = grid[(int)realCords.x, (int)realCords.y];
 			grid[(int)realCords.x, (int)realCords.y] = null;
+
 		}
+		
 
 		if(isUpwards)
 		{
@@ -572,6 +588,8 @@ public class TriangleGrid : MonoBehaviour {
 			}
 		}
 
+
+
 		// Left Node
 		n = getNode(x - 1, y);
 		if(n != null &&	
@@ -586,6 +604,7 @@ public class TriangleGrid : MonoBehaviour {
 
 		// Right Node
 		n = getNode(x + 1, y);
+		
 		if(n != null &&	
 		   n.triangleObject.GetComponent<TriangleColour>().GetColour()
 		   != Color.black)
@@ -595,8 +614,6 @@ public class TriangleGrid : MonoBehaviour {
 			realCords = getRealCoords(n.x , n.y);
 			grid[(int)realCords.x, (int)realCords.y] = null;
 		}
-		//Remove any triangles stranded by this action
-		attatchStranded();
 		
 		updateControlPoints = true;
 	}
@@ -604,18 +621,11 @@ public class TriangleGrid : MonoBehaviour {
 	/// <summary>
 	/// Checks for any nodes not connected to the center and removes them
 	/// </summary>
-	private void attatchStranded()
+	private void dettatchStranded()
 	{
-		//if the center was temporarily removed, return it to the grid
-		if( tempStoreCenter != null)
-		{
-			Vector2 centerCoord = getRealCoords(0,0);
-			grid[(int)centerCoord.x, (int)centerCoord.y] = tempStoreCenter;
-			tempStoreCenter = null;
-		}
 		
-		//join stranded triangles so they can float back to the center
 		triangleNode center = getNode(0, 0);
+		//remeber stranded triangles
 		System.Collections.Generic.List<triangleNode> strandedTriangles = new System.Collections.Generic.List<triangleNode>();
 		foreach( triangleNode n in grid)
 		{	
@@ -623,7 +633,6 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(!AStar(n,center))
 				{
-					//connectToNeighbours(n);
 					strandedTriangles.Add(n);
 				}
 			}
