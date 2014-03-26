@@ -16,6 +16,10 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static int multiplier = 1;
 
+	public static int queueBonus = 100;
+
+	public static int queueBonusTotal = 0;
+
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
@@ -75,5 +79,20 @@ public class GlobalFlags : MonoBehaviour {
 	public static void resetMultiplier()
 	{
 		multiplier = 1;
+	}
+
+	public static int getQueueBounus()
+	{
+		return queueBonus;
+	}
+
+	public static int getQueueBounusTotal()
+	{
+		return queueBonusTotal;
+	}
+
+	public static void setQueueBonusTotal(int i)
+	{
+		queueBonusTotal = i;
 	}
 }
