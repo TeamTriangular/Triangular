@@ -24,12 +24,12 @@ public class PauseMenu : MonoBehaviour {
 			if (paused){ 
 				//if open, then close the menu
 				paused = false;
-				GlobalFlags.canFire = true;
+				GlobalFlags.setPaused(false);
 			}
 			else{
 				//if closed, open the menu
 				paused = true;
-				GlobalFlags.canFire = false;
+				GlobalFlags.setPaused(true);
 			}
 		}
 	}
@@ -50,6 +50,7 @@ public class PauseMenu : MonoBehaviour {
 			float halfScreenH = Screen.height/2 - 80;
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Resume")){
 				paused = false;
+				GlobalFlags.setPaused(false);
 			}
 			
 			//set the restart button and functionality
@@ -58,6 +59,7 @@ public class PauseMenu : MonoBehaviour {
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Restart")){
 				//GlobalFlags.canFire = true;
 				Application.LoadLevel("game");
+				GlobalFlags.setPaused(false);
 			}
 			
 			//set the back to menu button and functionality
@@ -66,6 +68,7 @@ public class PauseMenu : MonoBehaviour {
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu")){
 				//GlobalFlags.canFire = true;
 				Application.LoadLevel("LevelSelectPreMenu");
+				GlobalFlags.setPaused(false);
 			}
 		}
 	}

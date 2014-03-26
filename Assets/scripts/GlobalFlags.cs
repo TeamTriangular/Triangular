@@ -20,6 +20,8 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static int queueBonusTotal = 0;
 
+	public static bool paused = false;
+
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
@@ -94,5 +96,13 @@ public class GlobalFlags : MonoBehaviour {
 	public static void setQueueBonusTotal(int i)
 	{
 		queueBonusTotal = i;
+	}
+
+	public static bool getPaused(){
+		return paused;
+	}
+
+	public static void setPaused(bool p){
+		paused = p;
 	}
 }
