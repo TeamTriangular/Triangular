@@ -673,7 +673,7 @@ public class TriangleGrid : MonoBehaviour {
 				{
 					if(skipNewCluster(newCenter))
 					{
-						n.skipDelay = true;
+						//n.skipDelay = true;
 					}
 					chainedClusters.Push(n);
 				}
@@ -692,7 +692,7 @@ public class TriangleGrid : MonoBehaviour {
 				{
 					if(skipNewCluster(newCenter))
 					{
-						n.skipDelay = true;
+						//n.skipDelay = true;
 					}
 					chainedClusters.Push(n);
 				}
@@ -713,7 +713,7 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(skipNewCluster(newCenter))
 				{
-					n.skipDelay = true;
+					//n.skipDelay = true;
 				}
 				chainedClusters.Push(n);
 			}
@@ -732,7 +732,7 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(skipNewCluster(newCenter))
 				{
-					n.skipDelay = true;
+					//n.skipDelay = true;
 				}
 				chainedClusters.Push(n);
 			}
