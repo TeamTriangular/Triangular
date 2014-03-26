@@ -12,7 +12,7 @@ public class CannonPlacement : MonoBehaviour {
 	
 	void FixedUpdate () 
 	{
-		
+		GlobalFlags.canFire = false;
  		GameObject cannon = GameObject.FindGameObjectWithTag("Player");
 		if (Input.GetMouseButton(0))
 		{
@@ -29,6 +29,7 @@ public class CannonPlacement : MonoBehaviour {
 				
 				if(mouseDist < cannonDist - sizeOffset)
 				{
+					GlobalFlags.canFire = true;
 					float y = (target.y - cannon.transform.position.y);
 					float x = (target.x - cannon.transform.position.x);
 					float atan = Mathf.Atan2(y, x);
