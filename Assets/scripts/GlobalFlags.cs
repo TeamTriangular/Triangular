@@ -12,6 +12,10 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static int score = 0;
 
+	public static int baseScoreValue = 100;
+
+	public static int multiplier = 1;
+
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
@@ -51,5 +55,25 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static int getScore(){
 		return score;
+	}
+
+	public static int getBaseScoreValue()
+	{
+		return baseScoreValue;
+	}
+
+	public static int getMultiplier()
+	{
+		return multiplier;
+	}
+
+	public static void incrementMultiplier()
+	{
+		multiplier++;
+	}
+
+	public static void resetMultiplier()
+	{
+		multiplier = 1;
 	}
 }

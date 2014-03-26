@@ -48,6 +48,8 @@ public class TriangleGrid : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
+		GlobalFlags.resetMultiplier();
+		GlobalFlags.setScore(0);
 		grid = new triangleNode[20,20];
 		gridSize = (int)Mathf.Sqrt(grid.Length);
 		gridOutline = new System.Collections.Generic.List<triangleNode>();
@@ -119,25 +121,28 @@ public class TriangleGrid : MonoBehaviour {
 				GlobalFlags.canFire = true;
 			}
 		}
-		
-		//decrement delay time
-		if(((elapsedChainDelay > 0 && elapsedChainDelay != float.MaxValue)) && (chainedClusters.Count == 0 || (chainedClusters.Count > 0 && !chainedClusters.Peek().skipDelay)))
+
+		if(!inEditMode)
 		{
-			elapsedChainDelay -= Time.deltaTime;
-		}
-		else if (elapsedChainDelay != float.MaxValue)
-		{
-			elapsedChainDelay = float.MaxValue;
-			
-			//if clusters left to deal with, color them and chain more
-			if(chainedClusters.Count > 0)
+			//decrement delay time
+			if(((elapsedChainDelay > 0 && elapsedChainDelay != float.MaxValue)) && (chainedClusters.Count == 0 || (chainedClusters.Count > 0 && !chainedClusters.Peek().skipDelay)))
 			{
-				CheckForGreaterTriangle(chainedClusters.Pop());
-				startChainDelay();
-				
+				elapsedChainDelay -= Time.deltaTime;
 			}
-			else if(chainedClusters.Count == 0)
+			else if (elapsedChainDelay != float.MaxValue)
 			{
+				elapsedChainDelay = float.MaxValue;
+			
+				//if clusters left to deal with, color them and chain more
+				if(chainedClusters.Count > 0)
+				{
+					GlobalFlags.incrementMultiplier();
+					CheckForGreaterTriangle(chainedClusters.Pop());
+					startChainDelay();
+				
+				}
+				else if(chainedClusters.Count == 0)
+				{
 		
 					foreach (triangleNode n in grid)
 					{
@@ -156,12 +161,20 @@ public class TriangleGrid : MonoBehaviour {
 					dettatchStranded();
 					
 					updateControlPoints = true;
-				
+						
+					GlobalFlags.resetMultiplier();	
+				}		
 			}
-			
-			
+			else
+			{
+				GameObject[] triangles = GameObject.FindGameObjectsWithTag("Triangle");
+				GameObject[] queueTriangles = GameObject.FindGameObjectsWithTag("QueueTriangle");
+				if(triangles.Length == 1 && queueTriangles.Length == 0)
+				{
+					Application.LoadLevel("PostGameMenu");
+				}
+			}
 		}
-		
 	}
 	
 	private void startChainDelay()
@@ -591,10 +604,13 @@ public class TriangleGrid : MonoBehaviour {
 
 	/// <summary>
 	/// Sets the greater triangle colours to match the center colour
+	/// Also increments score
 	/// </summary>
 	/// <param name="center">The Center Triangle</param>
 	private void SetGreaterTriangleColours(triangleNode center)
 	{
+		GlobalFlags.setScore(GlobalFlags.getScore() + (GlobalFlags.getBaseScoreValue() * GlobalFlags.getMultiplier()));
+
 		center.delayedDestroy = true;
 		
 		Color c = center.triangleObject.GetComponent<TriangleColour>().GetColour();
