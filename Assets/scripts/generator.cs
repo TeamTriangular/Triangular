@@ -27,6 +27,7 @@ public class generator : MonoBehaviour {
 		if(Input.GetMouseButtonUp(0) && GlobalFlags.canFire)
 		{
 			GameObject triInstance = queueScript.fireShot();//getting the triangle from the queue, so the queue can update
+			queueScript.randomLevelQueue();
 			if(triInstance != null) {
 				triInstance.transform.localPosition = shooter.transform.position + ((shooter.transform.rotation * Vector3.up) * 0.3f);
 				triInstance.transform.localRotation = Quaternion.identity;
