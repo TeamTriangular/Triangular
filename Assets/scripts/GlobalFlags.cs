@@ -8,6 +8,16 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static bool canFire = true;
 
+	/*
+	 * Flag for a never ending queue in random mode
+	 */
+	public static bool infiniteRandomMode = false;
+
+	/*
+	 * 
+	 */
+	public static bool trianglesStatic = true;
+
 	public static int level = 1; 
 
 	public static int score = 0;

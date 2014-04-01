@@ -118,7 +118,7 @@ public class TriangleGrid : MonoBehaviour {
 			//if all triangles are atatched to grid, let the player fire again
 			if(allTrianglesStatic())
 			{
-				GlobalFlags.canFire = true;
+				GlobalFlags.trianglesStatic = true;
 			}
 		}
 

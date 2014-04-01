@@ -91,6 +91,58 @@ public class queue : MonoBehaviour {
 		return null;
 	}
 
+	/**
+	 * Makes the queue longer once there are only 3 triangles left to shoot
+	 * Is called after each shot and tests if the level selected is infinite and random
+	 */
+	public void randomLevelQueue() {
+		if(GlobalFlags.infiniteRandomMode && inQueue.Length - currentTri == 3) {
+
+			inQueue [0] = inQueue [currentTri];  
+			inQueue [1] = inQueue [currentTri + 1];
+			inQueue [2] = inQueue [currentTri + 2];
+
+			for(int i = 3; i < inQueue.Length; i++) {
+				GameObject colour = randomColour();
+				colour.transform.localPosition = new Vector3(6.0f, 4.5f, 1.0f);
+				colour.transform.localRotation = new Quaternion(0,0,0,0);
+				colour.transform.localScale = new Vector3(1,1,1);
+				inQueue[i] = colour;
+			}
+			currentTri  = 0;
+		}
+	}
+
+	/**
+	 * Gives a random colour that a triangle can have. If new colours are added, this function needs to be updated
+	 * to attribute for this. Current triangles can be: blue, aqua, green pink, red, yellow.
+	 */
+	public GameObject randomColour() {
+		int thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor = (int) Random.Range (1, 6);
+		GameObject returnColour = null;
+		
+		if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 1) {
+			returnColour = (GameObject) Instantiate (redQueueTriangle);
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 2) {
+			returnColour = (GameObject) Instantiate (greenQueueTriangle);
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 3) {
+			returnColour = (GameObject) Instantiate (aquaQueueTriangle);
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 4) {
+			returnColour = (GameObject) Instantiate (pinkQueueTriangle);
+		}
+		else if(thisIsTheMostPointlesslyLongVariableNameThatHasNothingToDoWithWhatItIsUsedFor == 5) {
+			returnColour = (GameObject) Instantiate (yellowQueueTriangle);
+		} 
+		else {
+			returnColour = (GameObject) Instantiate (blueQueueTriangle);
+		}
+		
+		return returnColour;
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
