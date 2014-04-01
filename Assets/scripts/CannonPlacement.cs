@@ -33,7 +33,6 @@ public class CannonPlacement : MonoBehaviour {
 							GlobalFlags.canFire = true;
 						}
 
-						GlobalFlags.canFire = true;
 						float y = (target.y - cannon.transform.position.y);
 						float x = (target.x - cannon.transform.position.x);
 						float atan = Mathf.Atan2(y, x);
