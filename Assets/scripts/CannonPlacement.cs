@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 /**
@@ -29,6 +29,10 @@ public class CannonPlacement : MonoBehaviour {
 					
 					if(mouseDist < cannonDist - sizeOffset)
 					{
+						if (GlobalFlags.trianglesStatic) {
+							GlobalFlags.canFire = true;
+						}
+
 						GlobalFlags.canFire = true;
 						float y = (target.y - cannon.transform.position.y);
 						float x = (target.x - cannon.transform.position.x);

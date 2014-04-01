@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 /**
@@ -22,7 +22,6 @@ public class generator : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-<<<<<<< HEAD
  		GameObject cannon = GameObject.FindGameObjectWithTag("Player");
 		
 		if(Input.GetMouseButtonUp(0) && GlobalFlags.canFire)
@@ -40,28 +39,11 @@ public class generator : MonoBehaviour {
 				triInstance.transform.rotation = Quaternion.Euler(rot);
 			
 				cannon.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
-=======
 		if (!GlobalFlags.getPaused()){
 	 		GameObject cannon = GameObject.FindGameObjectWithTag("Player");
->>>>>>> 6111445a3afa37760ba41a4ff253fce923e7221c
 			
-			if(Input.GetMouseButtonUp(0) && GlobalFlags.canFire)
-			{
-				GameObject triInstance = queueScript.fireShot();//getting the triangle from the queue, so the queue can update
-				if(triInstance != null) {
-					triInstance.transform.localPosition = shooter.transform.position + ((shooter.transform.rotation * Vector3.up) * 0.3f);
-					triInstance.transform.localRotation = Quaternion.identity;
-
-					triInstance.rigidbody.AddForce((shooter.transform.rotation * Vector3.up) * shootingForce);
-				
-					Vector3 rot = transform.rotation.eulerAngles;
-					rot.z -= 60;
-					triInstance.transform.rotation = Quaternion.Euler(rot);
-				
-					cannon.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
-				
-					GlobalFlags.canFire = false;
-				}
+				GlobalFlags.canFire = false;
+				GlobalFlags.trianglesStatic = false;
 			}
 		}
 	}
