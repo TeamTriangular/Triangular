@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 /**
@@ -101,8 +101,8 @@ public class LevelParser : MonoBehaviour {
 			string [,] testComplete = new string[RANDOM_LENGTH * 2 + 1, RANDOM_LENGTH * 2 + 1];
 			
 			int arrLoc = 0;
-			int yLocTri = 0; //y location of the triangle in an array
-			for(int i = negRandY; i <= randY; i++) {
+			int yLocTri = RANDOM_LENGTH - randY; //y location  of the triangle in an array
+			for(int i = randY; i >= negRandY; i--) {
 				int negRandX = (int) Random.Range(1,RANDOM_LENGTH) * - 1;
 				int randX = (int) Random.Range(1,RANDOM_LENGTH);
 				
@@ -129,6 +129,7 @@ public class LevelParser : MonoBehaviour {
 				}
 				yLocTri++;
 			}
+
 			triArray = new TriInfo[arrLoc];
 			System.Array.Copy(temp, 0, triArray, 0, arrLoc);
 			
@@ -148,6 +149,9 @@ public class LevelParser : MonoBehaviour {
 	 * (-1, -1) and (1, -1). The second way is by going through the entire list and returning true or false depending on 
 	 * if a cluster is formed. 
 	 * @param string [] testComp, the 2D array of triangle of the level so far, which will be tested against. 
+	 * The y axis of testComp should be flipped compared to what the level looks like, as this is more
+	 * natural to build the array and to test against. Ie (0, 1) in the array will point to the triangle just
+	 * below the black triangle. Colours are represnted by their letters, black is the entire word for the middle triangle. 
 	 * @param bool wholeArray, flag for if you want to determine if the entire array has a complete set
 	 * @param int xLoc, x location of a triangle
 	 * @param int yLoc, y location of a triangle
@@ -170,8 +174,11 @@ public class LevelParser : MonoBehaviour {
 							string colour1 = testComp[i - 2, j];
 							string colour2 = testComp[i - 1, j - 1];
 							string colour3 = testComp[i, j];
+							//Debug.Log("c1=" + colour1 + "c2=" + colour2 + "c3=" + colour3 + ", i=" + (i - RANDOM_LENGTH) + "j=" + (j - RANDOM_LENGTH));
+
 							
-							if(string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
+							if((string.Compare(colour1, colour2) == 0) 
+							   && (string.Compare(colour1, colour3) == 0)
 							   		&& string.Compare(colour1, "") != -1) {
 								hasCluster = true;
 								break;
@@ -181,8 +188,10 @@ public class LevelParser : MonoBehaviour {
 							string colour1 = testComp[i - 1, j - 1];
 							string colour2 = testComp[i + 1, j - 1];
 							string colour3 = testComp[i, j];
+							//Debug.Log("c1=" + colour1 + "c2=" + colour2 + "c3=" + colour3 + ", i=" + (i - RANDOM_LENGTH) + "j=" + (j - RANDOM_LENGTH));
 							
-							if(hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0
+							if((string.Compare(colour1, colour2) == 0)
+							   && (string.Compare(colour1, colour3) == 0)
 							   		&& string.Compare(colour1, "") != -1) {
 								hasCluster = true;
 								break;
@@ -209,17 +218,38 @@ public class LevelParser : MonoBehaviour {
 					string colour2 = testComp[xLoc - 1, yLoc - 1];
 					string colour3 = testComp[xLoc, yLoc];
 					
-					hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
+					hasCluster = (string.Compare(colour1, colour2) == 0  || string.Compare(colour2, "black") == 0) 
+						&& (string.Compare(colour1, colour3) == 0  || string.Compare(colour3, "black") == 0);
 				} 
 				else {
 					string colour1 = testComp[xLoc - 1, yLoc - 1];
 					string colour2 = testComp[xLoc + 1, yLoc - 1];
 					string colour3 = testComp[xLoc, yLoc];
 					
-					hasCluster = string.Compare(colour1, colour2) == 0 && string.Compare(colour1, colour3) == 0;
+					hasCluster = (string.Compare(colour1, colour2) == 0  || string.Compare(colour2, "black") == 0) 
+						&& (string.Compare(colour1, colour3) == 0  || string.Compare(colour3, "black") == 0); 
 				}
 			}
-			
+
+		}
+
+		string c1 = testComp[RANDOM_LENGTH + 1,RANDOM_LENGTH - 1];
+		string c2 = testComp[RANDOM_LENGTH + 2,RANDOM_LENGTH];
+		
+		string c3 = testComp[RANDOM_LENGTH - 1,RANDOM_LENGTH - 1];
+		string c4 = testComp[RANDOM_LENGTH - 2,RANDOM_LENGTH];
+		
+		string c5 = testComp[RANDOM_LENGTH - 1,RANDOM_LENGTH + 1];
+		string c6 = testComp[RANDOM_LENGTH + 1,RANDOM_LENGTH + 1];
+		
+		if(string.Compare(c1, c2) == 0 && string.Compare(c1, "") != -1) {
+			hasCluster = true;
+		}
+		else if(string.Compare(c3, c4) == 0 && string.Compare(c3, "") != -1) {
+			hasCluster = true;
+		}
+		else if(string.Compare(c5, c6) == 0 && string.Compare(c5, "") != -1) {
+			hasCluster = true;
 		}
 		return hasCluster;
 	}
