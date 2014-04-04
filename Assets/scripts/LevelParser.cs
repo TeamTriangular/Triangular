@@ -83,8 +83,7 @@ public class LevelParser : MonoBehaviour {
 					int x = int.Parse(lines[i].Substring(0, commaIndex));
 					int y = int.Parse(lines[i].Substring(commaIndex + 1, colonIndex - 1 - commaIndex));
 					string colour = lines[i].Substring(colonIndex + 1, lines[i].Length - 1 - colonIndex);
-					
-					TriInfo triInfo = new TriInfo(x, y, colour);
+					TriInfo triInfo = new TriInfo(x, y, colour.Trim());
 					
 					triArray[i - 1] = triInfo; // first "i" was for the queue
 				}
