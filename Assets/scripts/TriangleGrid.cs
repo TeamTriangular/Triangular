@@ -109,7 +109,12 @@ public class TriangleGrid : MonoBehaviour {
 				}
 			}
 		}
-		
+
+		GameObject[] triangles = GameObject.FindGameObjectsWithTag("Triangle");
+		GameObject gObject = GameObject.FindGameObjectWithTag("Queue");
+
+		queue queueScript = gObject.GetComponent<queue>();
+
 		if(updateControlPoints)			
 		{
 			updateAllAttractionPoints();
@@ -119,6 +124,9 @@ public class TriangleGrid : MonoBehaviour {
 			if(allTrianglesStatic())
 			{
 				GlobalFlags.trianglesStatic = true;
+				if (queueScript.trisLeftInQueue() == 0 && triangles.Length != 1) {
+					Application.LoadLevel("EndGameMenu");
+				}
 			}
 		}
 
@@ -170,7 +178,6 @@ public class TriangleGrid : MonoBehaviour {
 			}
 			else
 			{
-				GameObject[] triangles = GameObject.FindGameObjectsWithTag("Triangle");
 				if(triangles.Length == 1)
 				{
 					GlobalFlags.setScore(GlobalFlags.getScore() + GlobalFlags.getQueueBounusTotal());
