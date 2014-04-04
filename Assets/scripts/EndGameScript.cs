@@ -6,6 +6,7 @@ public class EndGameScript : MonoBehaviour {
 	public GUISkin skin;//skin for buttons and backdrop
 	Rect backWindow; //button's backdrop
 	Rect label;
+
 	
 	private void Start(){
 		//back drop dimensions
@@ -40,8 +41,6 @@ public class EndGameScript : MonoBehaviour {
 		//button dimensions
 		float buttonW = 100;
 		float buttonH = 50;
-
-		string score = "Score: ";
 
 		GUI.Label(label, "Score: " + GlobalFlags.getScore());
 		
