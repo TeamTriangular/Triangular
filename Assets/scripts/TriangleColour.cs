@@ -101,7 +101,7 @@ public class TriangleColour : MonoBehaviour {
 			SetColour(Color.green);
 		}
 		else if(s.Equals(RED))
-		{
+		{		
 			SetColour(Color.red);
 		}
 		else if(s.Equals(YELLOW))
