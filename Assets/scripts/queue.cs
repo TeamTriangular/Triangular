@@ -207,6 +207,13 @@ public class queue : MonoBehaviour {
 		return inQueue.Length;
 	}
 
+	public int trisLeftInQueue() {
+		if(inQueue == null) {
+			return 0;
+		}
+		return inQueue.Length - currentTri;
+	}
+
 	public string[] toStringArray()
 	{
 		if(inQueue == null)
