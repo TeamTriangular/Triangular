@@ -26,7 +26,8 @@ public class TriangleGrid : MonoBehaviour {
 	private System.Collections.Generic.Stack<triangleNode> chainedClusters = new System.Collections.Generic.Stack<triangleNode>();
 	private float elapsedChainDelay = float.MaxValue;
 	public float chainDelayTime = 2.0f;
-	
+
+	Music music;
 
 	private class triangleNode
 	{
@@ -48,6 +49,9 @@ public class TriangleGrid : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
+		GameObject mGameObject = GameObject.FindGameObjectWithTag("Music");
+		music = mGameObject.GetComponent<Music> ();
+
 		GlobalFlags.resetMultiplier();
 		GlobalFlags.setScore(0);
 		grid = new triangleNode[20,20];
@@ -125,6 +129,9 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				GlobalFlags.trianglesStatic = true;
 				if (queueScript.trisLeftInQueue() == 0 && triangles.Length != 1) {
+					music.audio.volume = 0.1f;
+					music.setSeStartTime(Time.time, 2);
+					music.playSoundEffect("gameOver");
 					Application.LoadLevel("EndGameMenu");
 				}
 			}
@@ -180,6 +187,9 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(triangles.Length == 1)
 				{
+					music.audio.volume = 0.1f;
+					music.setSeStartTime(Time.time, 6);
+					music.playSoundEffect("machoMadness");
 					GlobalFlags.setScore(GlobalFlags.getScore() + GlobalFlags.getQueueBounusTotal());
 					Application.LoadLevel("PostGameMenu");
 				}
