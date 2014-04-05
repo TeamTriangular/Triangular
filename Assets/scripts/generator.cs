@@ -29,6 +29,13 @@ public class generator : MonoBehaviour {
 				GameObject triInstance = queueScript.fireShot ();//getting the triangle from the queue, so the queue can update
 				queueScript.randomLevelQueue ();
 				if (triInstance != null) {
+
+					GameObject gObject = GameObject.FindGameObjectWithTag("Music");
+					Music music = gObject.GetComponent<Music>();
+					music.audio.volume = 0.1f;
+					music.playSoundEffect("pterodactyl");
+					music.setSeStartTime(Time.time, 3);
+
 					triInstance.transform.localPosition = shooter.transform.position + ((shooter.transform.rotation * Vector3.up) * 0.3f);
 					triInstance.transform.localRotation = Quaternion.identity;
 
