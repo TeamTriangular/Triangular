@@ -295,6 +295,7 @@ public class queue : MonoBehaviour {
 		
 		float yLoc = 0.0f;
 		for(int i = 0; i < inQueue.Length; i++) {
+			queueTris[i] = queueTris[i].Trim();
 			if(queueTris[i].Equals(RED)) {
 				triInstance = (GameObject) Instantiate(redQueueTriangle);
 			}
