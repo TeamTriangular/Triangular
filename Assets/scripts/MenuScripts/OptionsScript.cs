@@ -10,15 +10,19 @@ public class OptionsScript : MonoBehaviour {
 	
 	void OnGUI () {
 		//set demensions of the buttons
-		float buttonW = 100;
-		float buttonH = 50;
+		float buttonW = Screen.width/3;
+		float buttonH = Screen.height/15;
 		float halfScreenW, halfScreenH; 
+		
+		GUIStyle style = new GUIStyle(GUI.skin.button);
+		style.fontSize = (int)(buttonH / 2);
+
 		//set the prebuilt button
 		
 		//set the back button
-		halfScreenW = (Screen.width/2) - 50;
-		halfScreenH = Screen.height/2 + 60;
-		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back")){
+		halfScreenW = Screen.width/2 - buttonW/2;
+		halfScreenH = Screen.height/2 - buttonH/2;
+		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back", style)){
 			Application.LoadLevel("ModeSelectMenu");
 		}
 	}
