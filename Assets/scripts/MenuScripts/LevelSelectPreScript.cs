@@ -10,25 +10,29 @@ public class LevelSelectPreScript : MonoBehaviour {
 	
 	void OnGUI () {
 		//set demensions of the buttons
-		float buttonW = 100;
-		float buttonH = 50;
+		float buttonW = Screen.width/3;
+		float buttonH = Screen.height/16;
 		float halfScreenW, halfScreenH; 
 		//set the prebuilt button
+		
+		GUIStyle style = new GUIStyle(GUI.skin.button);
+		style.fontSize = (int)(buttonH / 2);
 
 		// -430 -290 -170 -50 70 190 310
-		for (int i = 0; i < 7; i++){
-			halfScreenW = (Screen.width/2) - 410 + (i*120);
-			halfScreenH = Screen.height/2 + 0;
-			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Level: "+(i+1))){
+		for (int i = 0; i < 7; i++)
+		{
+			halfScreenW = (Screen.width/2) - buttonW/2;
+			halfScreenH = Screen.height/6 + (buttonH * 1.5f) * i;
+			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Level: "+(i+1), style)){
 				GlobalFlags.setLevel(i+1);
 				Application.LoadLevel("game");
 			}
 		}
 		
 		//set the back button
-		halfScreenW = (Screen.width/2) - 50;
-		halfScreenH = Screen.height/2 + 60;
-		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back")){
+		halfScreenW = (Screen.width/2) - buttonW/2;
+		halfScreenH = Screen.height/6 + (buttonH * 1.5f) * 7;
+		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back", style)){
 			Application.LoadLevel("ModeSelectMenu");
 		}
 	}

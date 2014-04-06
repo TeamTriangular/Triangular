@@ -9,8 +9,8 @@ public class PauseMenu : MonoBehaviour {
 	
 	private void Start(){
 		//back drop dimensions
-		float backW = 200;
-		float backH = 250;
+		float backW = 3 * Screen.width/4;
+		float backH = Screen.height/2;
 		//center the back drop
 		float halfScreenW = (Screen.width/2) - backW/2;
 		float halfScreenH = (Screen.height/2) - backH/2;
@@ -38,25 +38,31 @@ public class PauseMenu : MonoBehaviour {
 		
 		if (paused){
 			//if paused build the menu
-			GUI.skin = skin;
-			GUI.Box(backWindow, "Pause Menu");//title the menu
 			
 			//button dimensions
-			float buttonW = 100;
-			float buttonH = 50;
+			float buttonW = Screen.width/2;
+			float buttonH = Screen.height/10;
+			
+			GUIStyle style = new GUIStyle(GUI.skin.button);
+			style.fontSize = (int)(buttonH / 2.5f);
+			
+			GUI.skin = skin;
+			style.alignment = TextAnchor.UpperCenter;
+			GUI.Box(backWindow, "Pause Menu", style);//title the menu
+			style.alignment = TextAnchor.MiddleCenter;
 			
 			// set the resume button and functionality
 			float halfScreenW = (Screen.width/2) - buttonW/2;
-			float halfScreenH = Screen.height/2 - 80;
-			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Resume")){
+			float halfScreenH = Screen.height/3;
+			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Resume", style)){
 				paused = false;
 				GlobalFlags.setPaused(false);
 			}
 			
 			//set the restart button and functionality
 			halfScreenW = (Screen.width/2) - buttonW/2;
-			halfScreenH = Screen.height/2 - 20;
-			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Restart")){
+			halfScreenH = Screen.height/3 + buttonH * 1.5f;
+			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Restart", style)){
 				//GlobalFlags.canFire = true;
 				Application.LoadLevel("game");
 				GlobalFlags.setPaused(false);
@@ -64,8 +70,8 @@ public class PauseMenu : MonoBehaviour {
 			
 			//set the back to menu button and functionality
 			halfScreenW = (Screen.width/2) - buttonW/2;
-			halfScreenH = Screen.height/2 + 40;
-			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu")){
+			halfScreenH = Screen.height/3 + buttonH * 3;
+			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
 				//GlobalFlags.canFire = true;
 				Application.LoadLevel("LevelSelectPreMenu");
 				GlobalFlags.setPaused(false);
