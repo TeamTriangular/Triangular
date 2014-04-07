@@ -15,7 +15,7 @@ public class PostGameScript : MonoBehaviour {
 	void OnGUI () {
 		//set demensions of the buttons
 
-		if (Resources.Load("levels/level" + GlobalFlags.getLevel())){
+		if (Resources.Load("levels/level" + (GlobalFlags.getLevel() + 1))){
 			//System.IO.File.ReadAllLines("assets/levels/level" + (GlobalFlags.getLevel() + 1) + ".txt");
 			//GlobalFlags.setLevel(GlobalFlags.getLevel() + 1);
 
