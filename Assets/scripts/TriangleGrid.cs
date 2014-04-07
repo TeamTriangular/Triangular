@@ -19,9 +19,6 @@ public class TriangleGrid : MonoBehaviour {
 	//when cascading to avoid infinit recursion
 	private triangleNode tempStoreCenter;
 	
-	//delay updating attraction points until next update tick
-	bool updateControlPoints = false;
-	
 	//used for cascading
 	private System.Collections.Generic.Stack<triangleNode> chainedClusters = new System.Collections.Generic.Stack<triangleNode>();
 	private float elapsedChainDelay = float.MaxValue;
@@ -119,11 +116,11 @@ public class TriangleGrid : MonoBehaviour {
 
 		queue queueScript = gObject.GetComponent<queue>();
 
-		if(updateControlPoints)			
+		if(GlobalFlags.updateControlPoints)			
 		{
 			updateAllAttractionPoints();
-			updateControlPoints = false;
-			
+			GlobalFlags.updateControlPoints = false;
+
 			//if all triangles are atatched to grid, let the player fire again
 			if(allTrianglesStatic())
 			{
@@ -178,7 +175,7 @@ public class TriangleGrid : MonoBehaviour {
 					//Remove any triangles stranded by this action
 					dettatchStranded();
 					
-					updateControlPoints = true;
+					GlobalFlags.updateControlPoints = true;
 						
 					GlobalFlags.resetMultiplier();	
 				}		
@@ -442,7 +439,7 @@ public class TriangleGrid : MonoBehaviour {
 		//checking for a Greater Triangle
 		if(!CheckForGreaterTriangle(getNode((int)gridPos.x, (int)gridPos.y)))
 		{
-			updateControlPoints = true;
+			GlobalFlags.updateControlPoints = true;
 		}
 		
 	}
