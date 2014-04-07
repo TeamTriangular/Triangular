@@ -190,7 +190,12 @@ public class TriangleGrid : MonoBehaviour {
 					music.audio.volume = 0.1f;
 					music.setSeStartTime(Time.time, 6);
 					music.playSoundEffect("machoMadness");
-					GlobalFlags.setScore(GlobalFlags.getScore() + GlobalFlags.getQueueBounusTotal());
+					if (!GlobalFlags.infiniteRandomMode){ 
+						GlobalFlags.setScore(GlobalFlags.getScore() + GlobalFlags.getQueueBounusTotal());
+					}
+					else {
+						GlobalFlags.setScore(GlobalFlags.getScore());
+					}
 					Application.LoadLevel("PostGameMenu");
 				}
 			}

@@ -31,6 +31,14 @@ public class ModeSelectScript : MonoBehaviour {
 			Application.LoadLevel("game");
 		}
 
+		halfScreenW = (Screen.width/2) - buttonW/2;
+		halfScreenH = 7 * Screen.height/12;
+		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Infinite", style)){
+			GlobalFlags.setRandLevel (true);
+			GlobalFlags.infiniteRandomMode = true; 
+			Application.LoadLevel("game");
+		}
+
 		//set the user made button
 //		halfScreenW = (Screen.width/2) - buttonW/2;
 //		halfScreenH = 7 * Screen.height/12 + 0;
