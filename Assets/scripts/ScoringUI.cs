@@ -12,6 +12,8 @@ public class ScoringUI : MonoBehaviour {
 		
 		GUI.Label(new Rect(0,0,Screen.width,height),"Score: " +  GlobalFlags.getScore(), style);
 		GUI.Label(new Rect(0,1 * Screen.height/15,Screen.width,height),"Multiplier: " +  GlobalFlags.getMultiplier(), style);
-		GUI.Label(new Rect(0,2 * Screen.height/15,Screen.width,height),"Queue Bonus: " +  GlobalFlags.getQueueBounusTotal(), style);
+		if (!GlobalFlags.infiniteRandomMode){ 
+			GUI.Label(new Rect(0,2 * Screen.height/15,Screen.width,height),"Queue Bonus: " +  GlobalFlags.getQueueBounusTotal(), style);
+		}
 	}
 }
