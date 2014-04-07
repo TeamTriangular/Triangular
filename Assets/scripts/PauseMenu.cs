@@ -71,10 +71,20 @@ public class PauseMenu : MonoBehaviour {
 			//set the back to menu button and functionality
 			halfScreenW = (Screen.width/2) - buttonW/2;
 			halfScreenH = Screen.height/3 + buttonH * 3;
-			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
-				//GlobalFlags.canFire = true;
-				Application.LoadLevel("LevelSelectPreMenu");
-				GlobalFlags.setPaused(false);
+			if (!GlobalFlags.getRandLevel()) {
+				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
+					//GlobalFlags.canFire = true;
+					Application.LoadLevel("LevelSelectPreMenu");
+					GlobalFlags.setPaused(false);
+				}
+			}
+			else{
+				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
+					//GlobalFlags.canFire = true;
+					Application.LoadLevel("IntroMenu");
+					GlobalFlags.setRandLevel(false);
+					GlobalFlags.setPaused(false);
+				}
 			}
 		}
 	}
