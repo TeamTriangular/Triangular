@@ -97,7 +97,7 @@ public class PauseMenu : MonoBehaviour {
 					//GlobalFlags.canFire = true;
 					GlobalFlags.setRandLevel(false);
 					GlobalFlags.infiniteRandomMode = false; 
-					Application.LoadLevel("IntroMenu");
+					Application.LoadLevel("ModeSelectMenu");
 					GlobalFlags.setPaused(false);
 				}
 			}
