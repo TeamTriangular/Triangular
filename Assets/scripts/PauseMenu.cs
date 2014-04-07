@@ -81,8 +81,9 @@ public class PauseMenu : MonoBehaviour {
 			else{
 				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
 					//GlobalFlags.canFire = true;
-					Application.LoadLevel("IntroMenu");
 					GlobalFlags.setRandLevel(false);
+					GlobalFlags.infiniteRandomMode = false; 
+					Application.LoadLevel("IntroMenu");
 					GlobalFlags.setPaused(false);
 				}
 			}
