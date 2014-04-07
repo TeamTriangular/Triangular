@@ -29,6 +29,7 @@ public class OptionsScript : MonoBehaviour {
 		halfScreenH = Screen.height/6 + (buttonH * 1.5f) * 2;
 		musicVolume = GUI.HorizontalSlider(new Rect(halfScreenW,halfScreenH,buttonW,buttonH), musicVolume, 0.0f, 1.0f);
 		GlobalFlags.setMusicVolume(musicVolume);
+		GameObject.Find ("Music").GetComponent<Music>().UpdateVolume();
 
 		//sound effects volume slider
 		halfScreenW = Screen.width/2 - buttonW/2;
@@ -39,6 +40,7 @@ public class OptionsScript : MonoBehaviour {
 		halfScreenH = Screen.height/6 + (buttonH * 1.5f) * 4;
 		effectVolume = GUI.HorizontalSlider(new Rect(halfScreenW,halfScreenH,buttonW,buttonH), effectVolume, 0.0f, 1.0f);
 		GlobalFlags.setEffectVolume(effectVolume);
+		GameObject.Find ("SoundEffects").GetComponent<SoundEffects>().UpdateVolume();
 		
 		//set the back button
 		style = new GUIStyle(GUI.skin.button);

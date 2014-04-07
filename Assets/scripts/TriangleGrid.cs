@@ -126,7 +126,10 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				GlobalFlags.trianglesStatic = true;
 				if (queueScript.trisLeftInQueue() == 0 && triangles.Length != 1) {
-					music.audio.volume = 0.1f;
+					if(GlobalFlags.getMusicVolume() > 0.1f)
+					{
+						music.audio.volume = 0.1f;
+					}
 					music.setSeStartTime(Time.time, 2);
 					music.playSoundEffect("gameOver");
 					Application.LoadLevel("EndGameMenu");
@@ -184,7 +187,10 @@ public class TriangleGrid : MonoBehaviour {
 			{
 				if(triangles.Length == 1)
 				{
-					music.audio.volume = 0.1f;
+					if(GlobalFlags.getMusicVolume() > 0.1f)
+					{
+						music.audio.volume = 0.1f;
+					}
 					music.setSeStartTime(Time.time, 6);
 					music.playSoundEffect("machoMadness");
 					if (!GlobalFlags.infiniteRandomMode){ 
