@@ -16,6 +16,7 @@ public class PauseMenu : MonoBehaviour {
 		float halfScreenH = (Screen.height/2) - backH/2;
 		
 		backWindow = new Rect(halfScreenW, halfScreenH, backW, backH);//build backdrop
+
 	}
 	
 	void Update(){
@@ -35,25 +36,37 @@ public class PauseMenu : MonoBehaviour {
 	}
 	
 	void OnGUI(){
+
+		//button dimensions
+		float buttonW = Screen.width/4.8f;;
+		float buttonH = Screen.height/6;
+
+		float halfScreenW = (Screen.width) - (buttonW*1.1f);
+		float halfScreenH = Screen.height/6;
+
+		GUIStyle style = new GUIStyle(GUI.skin.button);
+		style.fontSize = (int)(buttonH / 2.5f);
+		
+		GUI.skin = skin;
+
+		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Pause", style)){
+			paused = true;
+			GlobalFlags.setPaused(true);
+		}
 		
 		if (paused){
 			//if paused build the menu
-			
-			//button dimensions
-			float buttonW = Screen.width/2;
-			float buttonH = Screen.height/10;
-			
-			GUIStyle style = new GUIStyle(GUI.skin.button);
-			style.fontSize = (int)(buttonH / 2.5f);
-			
-			GUI.skin = skin;
+
+			buttonW = Screen.width/2;
+			buttonH = Screen.height/10;
+
 			style.alignment = TextAnchor.UpperCenter;
 			GUI.Box(backWindow, "Pause Menu", style);//title the menu
 			style.alignment = TextAnchor.MiddleCenter;
 			
 			// set the resume button and functionality
-			float halfScreenW = (Screen.width/2) - buttonW/2;
-			float halfScreenH = Screen.height/3;
+			halfScreenW = (Screen.width/2) - buttonW/2;
+			halfScreenH = Screen.height/3;
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Resume", style)){
 				paused = false;
 				GlobalFlags.setPaused(false);
