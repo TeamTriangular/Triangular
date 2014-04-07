@@ -13,12 +13,16 @@ public class Music : MonoBehaviour {
 	void Start () {
 		GameObject go = GameObject.FindGameObjectWithTag ("SoundEffect");
 		se = go.GetComponent<SoundEffects>();
+		if(audio != null)
+		{
+			this.audio.volume = GlobalFlags.getMusicVolume();
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if(audio != null && !isSoundEffectPlaying(Time.time)) {
-			this.audio.volume = 1.0f;
+			this.audio.volume = GlobalFlags.getMusicVolume();
 		}
 	}
 
@@ -39,4 +43,8 @@ public class Music : MonoBehaviour {
 		se.playSoundEffect (choice);
 	}
 
+	public void UpdateVolume()
+	{
+		audio.volume = GlobalFlags.getMusicVolume();
+	}
 }

@@ -10,7 +10,7 @@ public class SoundEffects : MonoBehaviour {
 	public AudioClip gameOver;
 
 	void Start() {
-
+		audio.volume = GlobalFlags.getEffectVolume();
 	}
 
 	void Awake() {
@@ -32,5 +32,10 @@ public class SoundEffects : MonoBehaviour {
 			audio.clip = gameOver;
 		}
 		audio.Play ();
+	}
+
+	public void UpdateVolume()
+	{
+		audio.volume = GlobalFlags.getEffectVolume();
 	}
 }

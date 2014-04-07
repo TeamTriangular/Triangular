@@ -32,7 +32,10 @@ public class generator : MonoBehaviour {
 
 					GameObject gObject = GameObject.FindGameObjectWithTag("Music");
 					Music music = gObject.GetComponent<Music>();
-					music.audio.volume = 0.1f;
+					if(GlobalFlags.getMusicVolume() > 0.1f)
+					{
+						music.audio.volume = 0.1f;
+					}
 					music.playSoundEffect("pterodactyl");
 					music.setSeStartTime(Time.time, 3);
 
