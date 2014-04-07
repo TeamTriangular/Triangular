@@ -42,14 +42,15 @@ public class PauseMenu : MonoBehaviour {
 		float buttonH = Screen.height/6;
 
 		float halfScreenW = (Screen.width) - (buttonW*1.1f);
-		float halfScreenH = Screen.height/6;
+		//float halfScreenH = Screen.height/13;
+		float halfScreenH = buttonH/3;
 
 		GUIStyle style = new GUIStyle(GUI.skin.button);
-		style.fontSize = (int)(buttonH / 2.5f);
+		style.fontSize = (int)(buttonH / 3.5f);
 		
 		GUI.skin = skin;
 
-		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Pause", style)){
+		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"||", style)){
 			paused = true;
 			GlobalFlags.setPaused(true);
 		}
