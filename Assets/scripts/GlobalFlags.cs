@@ -32,6 +32,10 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static bool paused = false;
 
+	public static float musicVolume = 0.5f;
+
+	public static float effectVolume = 0.5f;
+
 	/*
 	 * Set for if you want the level to be randomly generated or not
 	 */
@@ -114,5 +118,35 @@ public class GlobalFlags : MonoBehaviour {
 
 	public static void setPaused(bool p){
 		paused = p;
+	}
+
+	public static float getMusicVolume(){
+		if (PlayerPrefs.HasKey("Music")){
+			musicVolume = PlayerPrefs.GetFloat("Music");
+		}
+		else {
+			PlayerPrefs.SetFloat("Music", musicVolume);
+		}
+		return musicVolume;
+	}
+
+	public static void setMusicVolume(float v){
+		musicVolume = v;
+		PlayerPrefs.SetFloat("Music", v);
+	}
+
+	public static float getEffectVolume(){
+		if (PlayerPrefs.HasKey("Effects")){
+			effectVolume = PlayerPrefs.GetFloat("Effects");
+		}
+		else {
+			PlayerPrefs.SetFloat("Music", effectVolume);
+		}
+		return effectVolume;
+	}
+
+	public static void setEffectVolume(float v){
+		effectVolume = v;
+		PlayerPrefs.SetFloat("Effects", v);
 	}
 }
