@@ -47,8 +47,10 @@ public class generator : MonoBehaviour {
 			
 					cannon.transform.localRotation = Quaternion.Euler (new Vector3 (0, 0, 180));
 			
-					GlobalFlags.canFire = false;
-					GlobalFlags.trianglesStatic = false;
+					if(GlobalFlags.bandAidFixToDefeatAllOtherBandAidFixes) {
+						GlobalFlags.canFire = false;
+						GlobalFlags.trianglesStatic = false;
+					}
 				}
 			}
 		}

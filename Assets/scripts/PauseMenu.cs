@@ -31,6 +31,7 @@ public class PauseMenu : MonoBehaviour {
 				//if closed, open the menu
 				paused = true;
 				GlobalFlags.setPaused(true);
+				GlobalFlags.bandAidFixToDefeatAllOtherBandAidFixes = false;
 			}
 		}
 	}
@@ -71,15 +72,18 @@ public class PauseMenu : MonoBehaviour {
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Resume", style)){
 				paused = false;
 				GlobalFlags.setPaused(false);
+				GlobalFlags.bandAidFixToDefeatAllOtherBandAidFixes = true;
 			}
 			
 			//set the restart button and functionality
 			halfScreenW = (Screen.width/2) - buttonW/2;
 			halfScreenH = Screen.height/3 + buttonH * 1.5f;
 			if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Restart", style)){
-				//GlobalFlags.canFire = true;
 				Application.LoadLevel("game");
+				GlobalFlags.canFire = true;
+				GlobalFlags.trianglesStatic = true;
 				GlobalFlags.setPaused(false);
+				GlobalFlags.updateControlPoints = true;
 			}
 			
 			//set the back to menu button and functionality
@@ -87,9 +91,11 @@ public class PauseMenu : MonoBehaviour {
 			halfScreenH = Screen.height/3 + buttonH * 3;
 			if (!GlobalFlags.getRandLevel()) {
 				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
-					//GlobalFlags.canFire = true;
 					Application.LoadLevel("LevelSelectPreMenu");
 					GlobalFlags.setPaused(false);
+					GlobalFlags.canFire = true;
+					GlobalFlags.trianglesStatic = true;
+					GlobalFlags.updateControlPoints = true;
 				}
 			}
 			else{
@@ -99,6 +105,7 @@ public class PauseMenu : MonoBehaviour {
 					GlobalFlags.infiniteRandomMode = false; 
 					Application.LoadLevel("ModeSelectMenu");
 					GlobalFlags.setPaused(false);
+					GlobalFlags.updateControlPoints = true;
 				}
 			}
 		}

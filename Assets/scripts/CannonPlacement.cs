@@ -31,6 +31,7 @@ public class CannonPlacement : MonoBehaviour {
 					{
 						if (GlobalFlags.trianglesStatic) {
 							GlobalFlags.canFire = true;
+							GlobalFlags.bandAidFixToDefeatAllOtherBandAidFixes = true;
 						}
 
 						float y = (target.y - cannon.transform.position.y);

@@ -13,6 +13,11 @@ public class GlobalFlags : MonoBehaviour {
 	 */
 	public static bool infiniteRandomMode = false;
 
+	//delay updating attraction points until next update tick
+	public static bool updateControlPoints = false;
+
+	public static bool bandAidFixToDefeatAllOtherBandAidFixes = true;
+
 	/*
 	 * 
 	 */
