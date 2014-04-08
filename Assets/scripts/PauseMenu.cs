@@ -54,6 +54,7 @@ public class PauseMenu : MonoBehaviour {
 		if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"||", style)){
 			paused = true;
 			GlobalFlags.setPaused(true);
+			GlobalFlags.bandAidFixToDefeatAllOtherBandAidFixes = false;
 		}
 		
 		if (paused){
