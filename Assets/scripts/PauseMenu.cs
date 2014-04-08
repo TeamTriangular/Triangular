@@ -91,7 +91,7 @@ public class PauseMenu : MonoBehaviour {
 			halfScreenW = (Screen.width/2) - buttonW/2;
 			halfScreenH = Screen.height/3 + buttonH * 3;
 			if (!GlobalFlags.getRandLevel()) {
-				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
+				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Main Menu", style)){
 					Application.LoadLevel("LevelSelectPreMenu");
 					GlobalFlags.setPaused(false);
 					GlobalFlags.canFire = true;
@@ -100,7 +100,7 @@ public class PauseMenu : MonoBehaviour {
 				}
 			}
 			else{
-				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Back To Menu", style)){
+				if (GUI.Button(new Rect(halfScreenW,halfScreenH,buttonW,buttonH),"Main Menu", style)){
 					//GlobalFlags.canFire = true;
 					GlobalFlags.setRandLevel(false);
 					GlobalFlags.infiniteRandomMode = false; 
